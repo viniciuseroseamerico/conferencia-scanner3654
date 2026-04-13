@@ -1,69 +1,497 @@
-ata da Carga: 2026-04-13
-Lacre: 005543
-Loja: 1597 - T 63
-Operador: Claudio
-Placa Veículo: BSR1s19
-🔴 ITENS COM DIVERGÊNCIA (24 itens)
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Conferência - Scanner Automático</title>
+    <style>
+        body { font-family: Arial; background: #1e3c72; padding: 20px; }
+        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; max-width: 1000px; margin-left: auto; margin-right: auto; }
+        button { background: #1e3c72; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        .drop-area { border: 2px dashed #1e3c72; padding: 30px; text-align: center; margin: 10px 0; cursor: pointer; background: #f8f9fa; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        .ok { background: #c6f6d5; padding: 10px; margin: 5px 0; border-left: 4px solid #48bb78; }
+        .erro { background: #fed7d7; padding: 10px; margin: 5px 0; border-left: 4px solid #e53e3e; }
+        .nota-card { border-left: 3px solid #1e3c72; padding: 10px; margin: 5px 0; background: #f0f0f0; border-radius: 5px; }
+        .ean-item { display: inline-block; background: #1e3c72; color: white; padding: 5px 10px; margin: 3px; border-radius: 3px; font-size: 11px; cursor: pointer; }
+        .progress-bar { background: #ddd; border-radius: 10px; height: 20px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { background: #48bb78; height: 100%; width: 0%; }
+        .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 150px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        h2 { margin-top: 0; }
+        .arquivo-lista { background: #e0e0e0; padding: 10px; border-radius: 5px; margin: 10px 0; max-height: 200px; overflow-y: auto; font-size: 12px; }
+        .scan-feedback { font-size: 14px; font-weight: bold; margin-top: 5px; }
+        .scanner-input { font-size: 18px; font-family: monospace; letter-spacing: 1px; }
+        .btn-salvar { background: #48bb78; }
+        .btn-salvar:hover { background: #38a169; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>📦 CONFERÊNCIA DE MERCADORIAS</h2>
+    <div class="form-row">
+        <div class="form-group"><label>📅 Data:</label><input type="date" id="data"></div>
+        <div class="form-group"><label>🔒 Lacre:</label><input type="text" id="lacre" placeholder="Ex: 001558"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>🏢 Nº Loja:</label><input type="text" id="lojaNum" placeholder="Ex: 1597"></div>
+        <div class="form-group"><label>📛 Nome Loja:</label><input type="text" id="lojaNome" placeholder="Ex: T63 Goiania"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>👤 Operador:</label><input type="text" id="operador" placeholder="Nome"></div>
+        <div class="form-group"><label>🚛 Placa Veículo:</label><input type="text" id="placa" placeholder="Ex: BRA7S19" style="text-transform: uppercase;"></div>
+    </div>
+    <button id="iniciarBtn">🚀 INICIAR</button>
+</div>
 
-
-NFe
-Código
-EAN
-Descrição
-Nota
-Conferido
-Diferença
-Tipo
-118606
-789817
-7898175598834
-PULVERIZADOR 1.5 LT VERDE - FG
-1
-2
-1
-SOBRA
-118606
-789602
-7896027013023
-JIMO MULTIINSETICIDAS 300 ML
-1
-3
-2
-SOBRA
-118606
-790832
-7908320400322
-BIOFRESH CASTRADO PEQ MINI 10,1KG
-1
-0
-1
-FALTA
-118606
-790832
-7908320400353
-BIOFRESH CASTRADO GD GIGANTES 15KG
-1
-2
-1
-SOBRA
-118606
-789604
-7896048918208
-GP MENU CAO AD MG FRANGO ARROZ 10,1KG
-1
-3
-2
-SOBRA
-118606
-789860
-7898604432876
-ND ANCESTRAL FELINE FRANGO 7,5KG
-1
-2
-1
-SOBRA
-118606
-789734
-7897348204121
-GOLDEN AD SENIOR MINI BITS 3 KG FD 6
-1
+<div id="conferenciaArea" style="display:none;">
+    <div class="card">
+        <div id="dropArea" class="drop-area">📁 ARRASTE O ZIP OU EXCEL AQUI<br><small>Coloque todos os arquivos Excel em uma pasta ZIP e arraste</small></div>
+        <div id="arquivosLista" class="arquivo-lista" style="display:none;"></div>
+        <div id="statusMsg"></div>
+    </div>
+    <div class="card"><div id="resumoDiv"></div></div>
+    <div class="card">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <button id="salvarProgressoBtn" class="btn-salvar">💾 SALVAR PROGRESSO</button>
+        </div>
+        <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 10px;">
+            <span style="font-size: 14px; color: #1e3c72;">📡 Scanner automático - apenas escaneie!</span>
+        </div>
+        <input type="text" id="scannerInput" class="scanner-input" placeholder="🔍 Escaneie o código EAN (automático)" autofocus>
+        <div id="scanResultDiv" class="scan-feedback"></div>
+    </div>
+    <div class="card">
+        <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
+        <div id="progressoTexto" style="text-align:center; margin:10px 0;"></div>
+        <div id="notasDiv"></div>
+    </div>
+    <div class="card">
+        <button id="relatorioBtn">📄 RELATÓRIO DE DIVERGÊNCIAS</button>
+        <button id="encerrarBtn" style="background:#e53e3e;">🗑️ ENCERRAR CARGA</button>
+    </div>
+</div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+let dados = { notas: [] };
+let ultimoCodigo = '';
+
+function salvarProgresso() {
+    if (dados.notas.length === 0) {
+        alert('Nenhum dado para salvar!');
+        return;
+    }
+    const progresso = { dados: dados, timestamp: new Date().toISOString(), ultimoCodigo: ultimoCodigo };
+    localStorage.setItem('conferenciaProgresso', JSON.stringify(progresso));
+    alert('✅ Progresso salvo com sucesso!');
+}
+
+function restaurarProgresso() {
+    const salvo = localStorage.getItem('conferenciaProgresso');
+    if (!salvo) return false;
+    try {
+        const progresso = JSON.parse(salvo);
+        const dataSalvo = new Date(progresso.timestamp);
+        const agora = new Date();
+        const diffHoras = (agora - dataSalvo) / (1000 * 60 * 60);
+        if (diffHoras > 24) {
+            localStorage.removeItem('conferenciaProgresso');
+            return false;
+        }
+        if (confirm(`Deseja restaurar a conferência salva em ${dataSalvo.toLocaleString()}?`)) {
+            dados = progresso.dados;
+            ultimoCodigo = progresso.ultimoCodigo || '';
+            atualizarTudo();
+            document.getElementById('data').value = dados.data || '';
+            document.getElementById('lacre').value = dados.lacre || '';
+            document.getElementById('lojaNum').value = dados.lojaNum || '';
+            document.getElementById('lojaNome').value = dados.lojaNome || '';
+            document.getElementById('operador').value = dados.operador || '';
+            document.getElementById('placa').value = dados.placa || '';
+            document.querySelector('.card').style.display = 'none';
+            document.getElementById('conferenciaArea').style.display = 'block';
+            document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ Progresso restaurado! ' + dados.notas.length + ' nota(s) carregadas.</div>';
+            return true;
+        }
+    } catch(e) { console.error('Erro ao restaurar:', e); }
+    return false;
+}
+
+document.getElementById('iniciarBtn').onclick = function() {
+    let data = document.getElementById('data').value;
+    let lacre = document.getElementById('lacre').value;
+    let lojaNum = document.getElementById('lojaNum').value;
+    let lojaNome = document.getElementById('lojaNome').value;
+    let operador = document.getElementById('operador').value;
+    let placa = document.getElementById('placa').value;
+    if (!data || !lacre || !lojaNum || !lojaNome || !operador) {
+        alert('Preencha todos os campos obrigatórios');
+        return;
+    }
+    dados = { data: data, lacre: lacre, lojaNum: lojaNum, lojaNome: lojaNome, operador: operador, placa: placa || 'Não informada', notas: [] };
+    document.querySelector('.card').style.display = 'none';
+    document.getElementById('conferenciaArea').style.display = 'block';
+    salvarProgresso();
+};
+
+function extrairEAN(campo) {
+    if (!campo) return '';
+    let match = campo.match(/\*(\d{10,14})\*/);
+    if (match) return match[1];
+    match = campo.match(/\b\d{13}\b/);
+    if (match) return match[0];
+    return campo;
+}
+
+function extrairDadosExcel(data, fileName) {
+    let workbook = XLSX.read(data, { type: 'array' });
+    let primeiraPlanilha = workbook.Sheets[workbook.SheetNames[0]];
+    let linhas = XLSX.utils.sheet_to_json(primeiraPlanilha, { header: 1, defval: "" });
+    let nfe = '';
+    let itens = [];
+    let eansEncontrados = new Map();
+    let totalValorNota = 0;
+    if (linhas.length > 0 && linhas[0].length > 4) {
+        let primeiraLinha = linhas[0];
+        let nfeCampo = primeiraLinha[3] || '';
+        let match = nfeCampo.match(/\d{6,9}/);
+        if (match) nfe = match[0];
+    }
+    if (!nfe) nfe = fileName.replace(/\.(xls|xlsx)$/i, '').substring(0, 15);
+    for (let i = 2; i < linhas.length; i++) {
+        let linha = linhas[i];
+        if (!linha || linha.length < 12) continue;
+        let codigo = String(linha[0] || '').trim();
+        let descricao = String(linha[1] || '').trim();
+        let eanRaw = String(linha[2] || '').trim();
+        let ean = extrairEAN(eanRaw);
+        let qtd = 0;
+        let custo = 0;
+        if (linha[7]) {
+            let qtdStr = String(linha[7]).replace('.', '').replace(',', '.').trim();
+            qtd = parseFloat(qtdStr) || 0;
+        }
+        if (linha[11]) {
+            let custoStr = String(linha[11]).replace('.', '').replace(',', '.').trim();
+            custo = parseFloat(custoStr) || 0;
+        }
+        if (ean && qtd > 0) {
+            if (!eansEncontrados.has(ean)) {
+                eansEncontrados.set(ean, {
+                    ean: ean,
+                    codigo: codigo,
+                    desc: descricao.substring(0, 60),
+                    qtd: qtd,
+                    custo: custo,
+                    conf: 0,
+                    origem: fileName
+                });
+                totalValorNota += qtd * custo;
+            }
+        }
+    }
+    let itensArray = Array.from(eansEncontrados.values());
+    return { nfe: nfe, itens: itensArray, fileName: fileName, totalValor: totalValorNota };
+}
+
+let dropArea = document.getElementById('dropArea');
+dropArea.ondragover = (e) => e.preventDefault();
+dropArea.ondrop = async (e) => {
+    e.preventDefault();
+    let file = e.dataTransfer.files[0];
+    if (!file) {
+        alert('Arraste um arquivo');
+        return;
+    }
+    let extensao = file.name.split('.').pop().toLowerCase();
+    if (extensao === 'zip') {
+        document.getElementById('statusMsg').innerHTML = '<div class="ok">⏳ Descompactando ZIP...</div>';
+        let zipData = await file.arrayBuffer();
+        let zip = await JSZip.loadAsync(zipData);
+        let arquivosExcel = [];
+        for (let [nome, arquivo] of Object.entries(zip.files)) {
+            if (!arquivo.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
+                let conteudo = await arquivo.async('arraybuffer');
+                arquivosExcel.push({ nome: nome, dados: conteudo });
+            }
+        }
+        if (arquivosExcel.length === 0) {
+            document.getElementById('statusMsg').innerHTML = '<div class="erro">❌ Nenhum arquivo Excel encontrado no ZIP!</div>';
+            return;
+        }
+        let listaDiv = document.getElementById('arquivosLista');
+        listaDiv.style.display = 'block';
+        listaDiv.innerHTML = '<strong>📁 ' + arquivosExcel.length + ' arquivo(s) encontrados no ZIP:</strong><br>' + 
+            arquivosExcel.map(f => '📄 ' + f.nome).join('<br>');
+        document.getElementById('statusMsg').innerHTML = '<div class="ok">⏳ Processando ' + arquivosExcel.length + ' arquivo(s)...</div>';
+        let todasNotas = [];
+        for (let arquivo of arquivosExcel) {
+            let nota = extrairDadosExcel(arquivo.dados, arquivo.nome);
+            if (nota.itens.length > 0) {
+                todasNotas.push(nota);
+            }
+        }
+        if (todasNotas.length === 0) {
+            document.getElementById('statusMsg').innerHTML = '<div class="erro">❌ Nenhum dado encontrado nos arquivos!</div>';
+            return;
+        }
+        dados.notas = todasNotas;
+        let totalItens = todasNotas.reduce((acc, n) => acc + n.itens.length, 0);
+        document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ ' + todasNotas.length + ' nota(s) carregadas com ' + totalItens + ' itens</div>';
+        salvarProgresso();
+        atualizarTudo();
+    } else if (['xls', 'xlsx'].includes(extensao)) {
+        document.getElementById('statusMsg').innerHTML = '<div class="ok">⏳ Processando arquivo...</div>';
+        let data = await file.arrayBuffer();
+        let nota = extrairDadosExcel(data, file.name);
+        if (!nota || nota.itens.length === 0) {
+            document.getElementById('statusMsg').innerHTML = '<div class="erro">❌ Não foi possível extrair dados!</div>';
+            return;
+        }
+        dados.notas = [nota];
+        document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ NFe ' + nota.nfe + ' carregada com ' + nota.itens.length + ' itens</div>';
+        salvarProgresso();
+        atualizarTudo();
+    } else {
+        alert('Arraste um arquivo Excel (.xls/.xlsx) ou uma pasta ZIP');
+    }
+};
+
+function atualizarTudo() {
+    let totalItens = 0, totalValor = 0;
+    for (let nota of dados.notas) {
+        for (let item of nota.itens) {
+            totalItens += item.qtd;
+            totalValor += item.qtd * item.custo;
+        }
+    }
+    document.getElementById('resumoDiv').innerHTML = '<div class="ok">📊 Notas: ' + dados.notas.length + ' | Itens: ' + totalItens + ' | Valor Total: R$ ' + totalValor.toFixed(2) + '</div>';
+    let notasDiv = document.getElementById('notasDiv');
+    notasDiv.innerHTML = '';
+    let totalGeral = 0, confGeral = 0;
+    for (let nota of dados.notas) {
+        let total = 0, conf = 0, valorNota = 0;
+        for (let item of nota.itens) {
+            total += item.qtd;
+            conf += Math.min(item.conf, item.qtd);
+            valorNota += item.qtd * item.custo;
+        }
+        totalGeral += total;
+        confGeral += conf;
+        let pct = total > 0 ? (conf / total) * 100 : 0;
+        let eansHtml = '';
+        for (let item of nota.itens) {
+            eansHtml += '<span class="ean-item" onclick="copiarEAN(\'' + item.ean + '\')">' + item.ean + '</span> ';
+        }
+        notasDiv.innerHTML += '<div class="nota-card">' +
+            '<strong>📄 NFe: ' + nota.nfe + '</strong> | Valor: R$ ' + valorNota.toFixed(2) + '<br>' +
+            'Itens: ' + conf + '/' + total + ' (' + pct.toFixed(0) + '%)<br>' +
+            '<div class="progress-bar" style="height:8px;"><div style="background:#48bb78; width:' + pct + '%; height:8px;"></div></div>' +
+            '<div><strong>📋 EANs (clique para copiar):</strong><br>' + eansHtml + '</div>' +
+            '</div>';
+    }
+    let pctGeral = totalGeral > 0 ? (confGeral / totalGeral) * 100 : 0;
+    document.getElementById('progressoBar').style.width = pctGeral + '%';
+    document.getElementById('progressoTexto').innerHTML = pctGeral.toFixed(1) + '% (' + confGeral + '/' + totalGeral + ' itens)';
+    salvarProgresso();
+}
+
+function copiarEAN(ean) {
+    document.getElementById('scannerInput').value = ean;
+    document.getElementById('scannerInput').focus();
+}
+
+let scanner = document.getElementById('scannerInput');
+let processando = false;
+
+scanner.addEventListener('input', function(e) {
+    let codigo = e.target.value.trim();
+    if (codigo.length >= 10 && /^\d+$/.test(codigo) && codigo !== ultimoCodigo && !processando) {
+        ultimoCodigo = codigo;
+        processando = true;
+        setTimeout(() => { processarEAN(codigo); }, 50);
+    }
+});
+
+scanner.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        let codigo = scanner.value.trim();
+        if (codigo && codigo !== ultimoCodigo && !processando) {
+            ultimoCodigo = codigo;
+            processando = true;
+            processarEAN(codigo);
+        }
+    }
+});
+
+function processarEAN(cod) {
+    let achou = false;
+    for (let nota of dados.notas) {
+        for (let item of nota.itens) {
+            if (item.ean === cod) {
+                item.conf++;
+                achou = true;
+                let msg = item.conf === item.qtd ? '✅ CONFERIDO' : (item.conf > item.qtd ? '⚠️ SOBRA' : '🔄 PARCIAL');
+                let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#ed8936' : '#4299e1');
+                document.getElementById('scanResultDiv').innerHTML = '<div style="background:' + cor + '; color:white; padding:10px; border-radius:5px;">📦 ' + item.desc + '<br>📊 ' + item.conf + '/' + item.qtd + ' - ' + msg + '<br>💰 R$ ' + (item.custo * item.qtd).toFixed(2) + '</div>';
+                setTimeout(() => { if (document.getElementById('scanResultDiv').innerHTML) document.getElementById('scanResultDiv').innerHTML = ''; }, 2000);
+                atualizarTudo();
+                break;
+            }
+        }
+        if (achou) break;
+    }
+    if (!achou) {
+        document.getElementById('scanResultDiv').innerHTML = '<div style="background:#e53e3e; color:white; padding:10px; border-radius:5px;">❌ Código ' + cod + ' não encontrado na carga!</div>';
+        setTimeout(() => { if (document.getElementById('scanResultDiv').innerHTML) document.getElementById('scanResultDiv').innerHTML = ''; }, 2000);
+    }
+    scanner.value = '';
+    scanner.focus();
+    setTimeout(() => { processando = false; ultimoCodigo = ''; }, 100);
+}
+
+document.getElementById('relatorioBtn').onclick = function() {
+    let divergencias = [];
+    let totalFalta = 0;
+    let totalSobra = 0;
+    let totalPrejuizo = 0;
+    let notasInfo = [];
+    
+    for (let nota of dados.notas) {
+        let valorNota = 0;
+        let prejuizoNota = 0;
+        for (let item of nota.itens) {
+            let diff = item.conf - item.qtd;
+            let prejuizo = Math.abs(diff) * (item.custo || 0);
+            valorNota += item.qtd * (item.custo || 0);
+            if (diff !== 0) {
+                divergencias.push({
+                    nfe: nota.nfe, codigo: item.codigo, ean: item.ean, desc: item.desc,
+                    qtdNota: item.qtd, qtdConferido: item.conf, diferenca: diff,
+                    tipo: diff < 0 ? 'FALTA' : 'SOBRA', prejuizo: prejuizo, custo: item.custo || 0
+                });
+                if (diff < 0) totalFalta += Math.abs(diff);
+                else totalSobra += diff;
+                totalPrejuizo += prejuizo;
+                prejuizoNota += prejuizo;
+            }
+        }
+        notasInfo.push({ nfe: nota.nfe, valorTotal: valorNota, prejuizo: prejuizoNota });
+    }
+    
+    let html = '<h2 style="text-align:center;">📊 RELATÓRIO DE DIVERGÊNCIAS</h2><hr>' +
+        '<p><strong>Data da Carga:</strong> ' + dados.data + '</p>' +
+        '<p><strong>Lacre:</strong> ' + dados.lacre + '</p>' +
+        '<p><strong>Loja:</strong> ' + dados.lojaNum + ' - ' + dados.lojaNome + '</p>' +
+        '<p><strong>Operador:</strong> ' + dados.operador + '</p>' +
+        '<p><strong>Placa Veículo:</strong> ' + dados.placa + '</p><hr>';
+    
+    if (divergencias.length === 0) {
+        html += '<div style="background:#c6f6d5; text-align:center; padding:20px; border-radius:5px;">✅ NENHUMA DIVERGÊNCIA ENCONTRADA!<br>Carga conferida com sucesso!</div>';
+    } else {
+        html += '<h3>🔴 ITENS COM DIVERGÊNCIA (' + divergencias.length + ' itens)</h3>';
+        html += '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
+        html += '<thead><tr style="background:#1e3c72; color:white;">' +
+            '<th style="border:1px solid #ccc; padding:8px;">NFe</th>' +
+            '<th style="border:1px solid #ccc; padding:8px;">Código</th>' +
+            '<th style="border:1px solid #ccc; padding:8px;">EAN</th>' +
+            '<th style="border:1px solid #ccc; padding:8px;">Descrição</th>' +
+            '<th style="border:1px solid #ccc; padding:8px;">Nota</th>' +
+            '<th style="border:1px solid #ccc; padding:8px;">Conf</th>' +
+            '<th style="border:1px solid #ccc; padding:8px;">Dif</th>' +
+            '<th style="border:1px solid #ccc; padding:8px;">Tipo</th>' +
+            '<th style="border:1px solid #ccc; padding:8px;">Prejuízo</th>' +
+            '</table></thead><tbody>';
+        for (let div of divergencias) {
+            let cor = div.tipo === 'FALTA' ? '#e53e3e' : '#ed8936';
+            html += '<tr>' +
+                '<td style="border:1px solid #ccc; padding:8px;">' + div.nfe + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px;">' + div.codigo + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px;">' + div.ean + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px;">' + div.desc.substring(0, 35) + (div.desc.length > 35 ? '...' : '') + '</td' +
+                '<td style="border:1px solid #ccc; padding:8px; text-align:center">' + div.qtdNota + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px; text-align:center">' + div.qtdConferido + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px; text-align:center; color:' + cor + '; font-weight:bold">' + Math.abs(div.diferenca) + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px; text-align:center; color:' + cor + '; font-weight:bold">' + div.tipo + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px; text-align:center">R$ ' + div.prejuizo.toFixed(2) + '</td>' +
+                '</tr>';
+        }
+        html += '</tbody></table>';
+        
+        html += '<hr><h3>📊 RESUMO POR NOTA</h3>';
+        html += '<table style="width:100%; border-collapse:collapse;">';
+        html += '<thead><tr style="background:#1e3c72; color:white;"><th>NFe</th><th>Valor Total</th><th>Prejuízo</th></tr></thead><tbody>';
+        for (let nota of notasInfo) {
+            html += '<tr>' +
+                '<td style="border:1px solid #ccc; padding:8px;">' + nota.nfe + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px; text-align:center">R$ ' + nota.valorTotal.toFixed(2) + '</td>' +
+                '<td style="border:1px solid #ccc; padding:8px; text-align:center; color:#e53e3e;">R$ ' + nota.prejuizo.toFixed(2) + '</td>' +
+                '</tr>';
+        }
+        html += '</tbody></table>';
+        
+        html += '<hr><h3>📊 RESUMO GERAL</h3>';
+        html += '<p><strong>Total de itens com FALTA:</strong> ' + totalFalta + '</p>';
+        html += '<p><strong>Total de itens com SOBRA:</strong> ' + totalSobra + '</p>';
+        html += '<p><strong>Total de itens divergentes:</strong> ' + divergencias.length + '</p>';
+        html += '<p><strong>Prejuízo total estimado:</strong> R$ ' + totalPrejuizo.toFixed(2) + '</p>';
+    }
+    
+    html += '<hr><div style="text-align:center; margin-top:30px;"><p>___________________________________</p><p>Assinatura do Responsável</p></div>';
+    
+    let win = window.open('', '_blank', 'width=900,height=700,menubar=yes,toolbar=yes');
+    if (!win) {
+        alert('⚠️ Pop-up bloqueado! Por favor, permita pop-ups para este site.');
+        return;
+    }
+    win.document.write('<!DOCTYPE html><html><head><title>Relatório de Divergências</title>' +
+        '<meta charset="UTF-8">' +
+        '<style>' +
+        'body{font-family:Arial,Helvetica,sans-serif;margin:20px;}' +
+        'table{border-collapse:collapse;width:100%;margin:10px 0;}' +
+        'td,th{border:1px solid #aaa;padding:8px;text-align:left;}' +
+        'th{background:#1e3c72;color:white;}' +
+        'h2{color:#1e3c72;}' +
+        'h3{background:#e0e0e0;padding:8px;}' +
+        '.ok{background:#c6f6d5;padding:15px;text-align:center;}' +
+        '@media print{' +
+        '   body{margin:0;padding:10px;}' +
+        '   button{display:none;}' +
+        '}' +
+        '</style>' +
+        '</head>' +
+        '<body>' + html + 
+        '<script>' +
+        '   window.onload=function(){' +
+        '       setTimeout(function(){' +
+        '           window.print();' +
+        '           setTimeout(function(){window.close();},1000);' +
+        '       },500);' +
+        '   };' +
+        '<\/script>' +
+        '</body></html>');
+    win.document.close();
+};
+
+document.getElementById('salvarProgressoBtn').onclick = function() { salvarProgresso(); };
+document.getElementById('encerrarBtn').onclick = function() {
+    if (confirm('⚠️ ENCERRAR CARGA? Todos os dados serão apagados!')) {
+        localStorage.removeItem('conferenciaProgresso');
+        location.reload();
+    }
+};
+
+window.onload = function() {
+    if (localStorage.getItem('conferenciaProgresso')) {
+        if (confirm('🔄 Há uma conferência em andamento. Deseja restaurar?')) {
+            restaurarProgresso();
+        } else {
+            localStorage.removeItem('conferenciaProgresso');
+        }
+    }
+};
+</script>
+</body>
+</html>
