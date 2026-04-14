@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Conferência - Com Proteção</title>
+    <title>Conferência - Scanner Auto</title>
     <style>
         body { font-family: Arial; background: #1e3c72; padding: 20px; }
         .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
@@ -14,18 +14,16 @@
         .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
         .form-group { flex: 1; min-width: 150px; }
         .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-        h2, h3 { margin-top: 0; }
+        h2 { margin-top: 0; }
         .nota-card { border-left: 3px solid #1e3c72; padding: 10px; margin: 5px 0; background: #f0f0f0; border-radius: 5px; }
         .ean-item { display: inline-block; background: #1e3c72; color: white; padding: 5px 10px; margin: 3px; border-radius: 3px; font-size: 11px; cursor: pointer; }
         .progress-bar { background: #ddd; border-radius: 10px; height: 20px; overflow: hidden; margin: 10px 0; }
         .progress-fill { background: #48bb78; height: 100%; width: 0%; }
         .scanner-input { font-size: 18px; font-family: monospace; }
         table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-        th, td { border: 1px solid #aaa; padding: 8px; text-align: left; vertical-align: top; }
+        th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
         th { background: #1e3c72; color: white; }
-        .resumo-nota { background: #e0e0e0; padding: 10px; margin: 10px 0; border-radius: 5px; font-weight: bold; }
         .btn-salvar { background: #48bb78; }
-        .btn-salvar:hover { background: #38a169; }
     </style>
 </head>
 <body>
@@ -33,15 +31,15 @@
     <h2>📦 CONFERÊNCIA DE MERCADORIAS</h2>
     <div class="form-row">
         <div class="form-group"><label>📅 Data:</label><input type="date" id="data"></div>
-        <div class="form-group"><label>🔒 Lacre:</label><input type="text" id="lacre" placeholder="Ex: 001558"></div>
+        <div class="form-group"><label>🔒 Lacre:</label><input type="text" id="lacre"></div>
     </div>
     <div class="form-row">
-        <div class="form-group"><label>🏢 Loja:</label><input type="text" id="lojaNum" placeholder="Nº Loja"></div>
-        <div class="form-group"><label>📛 Nome Loja:</label><input type="text" id="lojaNome" placeholder="Nome Loja"></div>
+        <div class="form-group"><label>🏢 Loja:</label><input type="text" id="lojaNum"></div>
+        <div class="form-group"><label>📛 Nome Loja:</label><input type="text" id="lojaNome"></div>
     </div>
     <div class="form-row">
-        <div class="form-group"><label>👤 Operador:</label><input type="text" id="operador" placeholder="Operador"></div>
-        <div class="form-group"><label>🚛 Placa:</label><input type="text" id="placa" placeholder="Placa Veículo" style="text-transform: uppercase;"></div>
+        <div class="form-group"><label>👤 Operador:</label><input type="text" id="operador"></div>
+        <div class="form-group"><label>🚛 Placa:</label><input type="text" id="placa"></div>
     </div>
     <button id="iniciarBtn">🚀 INICIAR</button>
 </div>
@@ -53,23 +51,20 @@
     </div>
     <div class="card"><div id="resumoDiv"></div></div>
     <div class="card">
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <button id="salvarProgressoBtn" class="btn-salvar">💾 SALVAR PROGRESSO</button>
-        </div>
         <div style="background: #f0f4f8; padding: 10px; text-align: center; border-radius: 5px;">
-            🔍 Scanner automático - escaneie o código EAN
+            🔍 Scanner automático - apenas escaneie!
         </div>
-        <input type="text" id="scannerInput" class="scanner-input" placeholder="Escaneie o código EAN..." autofocus>
+        <input type="text" id="scannerInput" class="scanner-input" placeholder="Escaneie o código..." autofocus>
         <div id="scanResultDiv"></div>
     </div>
     <div class="card">
         <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
-        <div id="progressoTexto" style="text-align:center; margin:5px 0;"></div>
+        <div id="progressoTexto" style="text-align:center;"></div>
         <div id="notasDiv"></div>
     </div>
     <div class="card">
-        <button id="relatorioBtn">📄 RELATÓRIO DE DIVERGÊNCIAS</button>
-        <button id="encerrarBtn" style="background:#e53e3e;">🗑️ ENCERRAR CARGA</button>
+        <button id="relatorioBtn">📄 RELATÓRIO</button>
+        <button id="encerrarBtn" style="background:#e53e3e;">🗑️ ENCERRAR</button>
     </div>
 </div>
 
@@ -80,185 +75,136 @@ let dados = { notas: [] };
 let ultimoCodigo = '';
 let processando = false;
 
-// Função para salvar progresso
 function salvarProgresso() {
-    if (dados.notas.length === 0) {
-        alert('Nenhum dado para salvar!');
-        return;
-    }
-    const progresso = {
-        dados: dados,
-        timestamp: new Date().toISOString()
-    };
-    localStorage.setItem('conferenciaProgresso', JSON.stringify(progresso));
-    alert('✅ Progresso salvo com sucesso!');
+    if (dados.notas.length === 0) return;
+    localStorage.setItem('conferenciaProgresso', JSON.stringify({ dados, timestamp: new Date().toISOString() }));
 }
 
-// Função para restaurar progresso
 function restaurarProgresso() {
-    const salvo = localStorage.getItem('conferenciaProgresso');
+    let salvo = localStorage.getItem('conferenciaProgresso');
     if (!salvo) return false;
-    try {
-        const progresso = JSON.parse(salvo);
-        const dataSalvo = new Date(progresso.timestamp);
-        if (confirm(`Deseja restaurar a conferência salva em ${dataSalvo.toLocaleString()}?`)) {
-            dados = progresso.dados;
-            
-            // Restaurar campos do formulário
-            document.getElementById('data').value = dados.data || '';
-            document.getElementById('lacre').value = dados.lacre || '';
-            document.getElementById('lojaNum').value = dados.lojaNum || '';
-            document.getElementById('lojaNome').value = dados.lojaNome || '';
-            document.getElementById('operador').value = dados.operador || '';
-            document.getElementById('placa').value = dados.placa || '';
-            
-            document.querySelector('.card').style.display = 'none';
-            document.getElementById('conferenciaArea').style.display = 'block';
-            atualizarTudo();
-            document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ Progresso restaurado! ' + dados.notas.length + ' nota(s) carregadas.</div>';
-            return true;
-        }
-    } catch(e) { console.error('Erro ao restaurar:', e); }
+    let progresso = JSON.parse(salvo);
+    if (confirm(`Restaurar conferência de ${new Date(progresso.timestamp).toLocaleString()}?`)) {
+        dados = progresso.dados;
+        document.getElementById('data').value = dados.data || '';
+        document.getElementById('lacre').value = dados.lacre || '';
+        document.getElementById('lojaNum').value = dados.lojaNum || '';
+        document.getElementById('lojaNome').value = dados.lojaNome || '';
+        document.getElementById('operador').value = dados.operador || '';
+        document.getElementById('placa').value = dados.placa || '';
+        document.querySelector('.card').style.display = 'none';
+        document.getElementById('conferenciaArea').style.display = 'block';
+        atualizarTudo();
+        document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ Progresso restaurado!</div>';
+        return true;
+    }
     return false;
 }
 
-document.getElementById('iniciarBtn').onclick = function() {
+document.getElementById('iniciarBtn').onclick = () => {
     let data = document.getElementById('data').value;
     let lacre = document.getElementById('lacre').value;
     let lojaNum = document.getElementById('lojaNum').value;
     let lojaNome = document.getElementById('lojaNome').value;
     let operador = document.getElementById('operador').value;
     let placa = document.getElementById('placa').value;
-    if (!data || !lacre || !lojaNum || !lojaNome || !operador) {
-        alert('Preencha todos os campos obrigatórios');
-        return;
-    }
+    if (!data || !lacre || !lojaNum || !lojaNome || !operador) return alert('Preencha todos os campos');
     dados = { data, lacre, lojaNum, lojaNome, operador, placa: placa || 'N/A', notas: [] };
     document.querySelector('.card').style.display = 'none';
     document.getElementById('conferenciaArea').style.display = 'block';
-    salvarProgresso();
 };
+
+function converterNumero(valor) {
+    if (valor === undefined || valor === null) return 0;
+    let str = String(valor).trim();
+    str = str.replace(/\./g, '').replace(',', '.');
+    let num = parseFloat(str);
+    return isNaN(num) ? 0 : num;
+}
 
 function extrairDadosExcel(data, fileName) {
     let workbook = XLSX.read(data, { type: 'array' });
-    let primeiraPlanilha = workbook.Sheets[workbook.SheetNames[0]];
-    let linhas = XLSX.utils.sheet_to_json(primeiraPlanilha, { header: 1, defval: "" });
-    
-    let nfe = '';
-    let itens = [];
-    let eansMap = new Map();
-    
-    if (linhas[0] && linhas[0][3]) nfe = String(linhas[0][3]).trim();
-    if (!nfe) nfe = 'NFE_' + Date.now();
+    let linhas = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, defval: "" });
+    let nfe = (linhas[0] && linhas[0][3]) ? String(linhas[0][3]).trim() : 'NFE_' + Date.now();
+    let itens = [], eansMap = new Map();
     
     for (let i = 1; i < linhas.length; i++) {
         let linha = linhas[i];
         if (!linha || linha.length < 8) continue;
         
-        let codigo = linha[0] ? String(linha[0]).trim() : '';
-        let descricao = linha[1] ? String(linha[1]).trim() : '';
         let ean = linha[3] ? String(linha[3]).trim() : '';
-        
-        let qtd = 0;
-        if (linha[7] !== undefined && linha[7] !== null) {
-            let qtdStr = String(linha[7]).replace('.', '').replace(',', '.').trim();
-            qtd = parseFloat(qtdStr) || 0;
-        }
-        
-        let valorTotal = 0;
-        if (linha[11] !== undefined && linha[11] !== null) {
-            let valorStr = String(linha[11]).replace('.', '').replace(',', '.').trim();
-            valorTotal = parseFloat(valorStr) || 0;
-        }
-        
-        let custoUnitario = qtd > 0 ? valorTotal / qtd : 0;
+        let qtd = converterNumero(linha[7]);
+        let valorTotal = converterNumero(linha[11]);
         
         if (ean && ean !== 'SEM GTIN' && ean.length >= 10 && qtd > 0 && !eansMap.has(ean)) {
             eansMap.set(ean, {
                 ean: ean,
-                codigo: codigo,
-                desc: descricao.substring(0, 50),
                 qtd: qtd,
                 valorTotal: valorTotal,
-                custo: custoUnitario,
+                custo: qtd > 0 ? valorTotal / qtd : 0,
+                codigo: linha[0] ? String(linha[0]).trim() : '',
+                desc: linha[1] ? String(linha[1]).trim().substring(0, 50) : '',
                 conf: 0
             });
         }
     }
-    
     return { nfe, itens: Array.from(eansMap.values()), fileName };
 }
 
 let dropArea = document.getElementById('dropArea');
-dropArea.ondragover = (e) => e.preventDefault();
-dropArea.ondrop = async (e) => {
+dropArea.ondragover = e => e.preventDefault();
+dropArea.ondrop = async e => {
     e.preventDefault();
     let file = e.dataTransfer.files[0];
     if (!file) return;
-    
-    let extensao = file.name.split('.').pop().toLowerCase();
+    let ext = file.name.split('.').pop().toLowerCase();
     let notas = [];
     
-    if (extensao === 'zip') {
+    if (ext === 'zip') {
         let zip = await JSZip.loadAsync(await file.arrayBuffer());
-        for (let [nome, arquivo] of Object.entries(zip.files)) {
-            if (!arquivo.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
-                let dadosArquivo = await arquivo.async('arraybuffer');
-                let nota = extrairDadosExcel(dadosArquivo, nome);
+        for (let [nome, arq] of Object.entries(zip.files)) {
+            if (!arq.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
+                let nota = extrairDadosExcel(await arq.async('arraybuffer'), nome);
                 if (nota.itens.length) notas.push(nota);
             }
         }
-    } else if (['xls', 'xlsx'].includes(extensao)) {
+    } else if (['xls', 'xlsx'].includes(ext)) {
         let nota = extrairDadosExcel(await file.arrayBuffer(), file.name);
         if (nota.itens.length) notas.push(nota);
     }
     
-    if (notas.length === 0) {
-        document.getElementById('statusMsg').innerHTML = '<div class="erro">Nenhum item encontrado nos arquivos!</div>';
-        return;
-    }
-    
+    if (!notas.length) return document.getElementById('statusMsg').innerHTML = '<div class="erro">Nenhum dado encontrado!</div>';
     dados.notas = notas;
-    document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ ' + notas.length + ' nota(s) carregadas!</div>';
+    document.getElementById('statusMsg').innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas!</div>`;
     atualizarTudo();
     salvarProgresso();
 };
 
 function atualizarTudo() {
-    let totalItensGeral = 0, totalConfGeral = 0;
+    let totalItens = 0, totalConf = 0;
     let notasDiv = document.getElementById('notasDiv');
     notasDiv.innerHTML = '';
     
     for (let nota of dados.notas) {
-        let totalItens = 0, totalConf = 0, valorNota = 0;
+        let tItens = 0, tConf = 0, valorNota = 0;
         for (let item of nota.itens) {
-            totalItens += item.qtd;
-            totalConf += Math.min(item.conf, item.qtd);
+            tItens += item.qtd;
+            tConf += Math.min(item.conf, item.qtd);
             valorNota += item.valorTotal;
         }
-        totalItensGeral += totalItens;
-        totalConfGeral += totalConf;
-        
-        let pct = totalItens > 0 ? (totalConf / totalItens) * 100 : 0;
-        
-        let eansHtml = '';
-        for (let item of nota.itens) {
-            eansHtml += `<span class="ean-item" onclick="copiarEAN('${item.ean}')">${item.ean}</span>`;
-        }
-        
-        notasDiv.innerHTML += `
-            <div class="nota-card">
-                <strong>📄 NFe: ${nota.nfe}</strong> | Valor: R$ ${valorNota.toFixed(2)}<br>
-                Itens: ${totalConf}/${totalItens} (${pct.toFixed(0)}%)<br>
-                <div class="progress-bar" style="height:6px;"><div style="background:#48bb78; width:${pct}%; height:6px;"></div></div>
-                <div><strong>EANs:</strong> ${eansHtml}</div>
-            </div>`;
+        totalItens += tItens;
+        totalConf += tConf;
+        let pct = tItens ? (tConf / tItens) * 100 : 0;
+        let eansHtml = nota.itens.map(item => `<span class="ean-item" onclick="copiarEAN('${item.ean}')">${item.ean}</span>`).join('');
+        notasDiv.innerHTML += `<div class="nota-card"><strong>📄 NFe: ${nota.nfe}</strong> | Valor: R$ ${valorNota.toFixed(2)}<br>
+            Itens: ${tConf}/${tItens} (${pct.toFixed(0)}%)<br>
+            <div class="progress-bar" style="height:6px;"><div style="background:#48bb78; width:${pct}%; height:6px;"></div></div>
+            <div><strong>EANs:</strong> ${eansHtml}</div></div>`;
     }
-    
-    let pctGeral = totalItensGeral > 0 ? (totalConfGeral / totalItensGeral) * 100 : 0;
+    let pctGeral = totalItens ? (totalConf / totalItens) * 100 : 0;
     document.getElementById('progressoBar').style.width = pctGeral + '%';
-    document.getElementById('progressoTexto').innerHTML = `${pctGeral.toFixed(1)}% (${totalConfGeral}/${totalItensGeral} itens)`;
-    document.getElementById('resumoDiv').innerHTML = `<div class="ok">📊 Notas: ${dados.notas.length} | Itens: ${totalItensGeral}</div>`;
+    document.getElementById('progressoTexto').innerHTML = `${pctGeral.toFixed(1)}% (${totalConf}/${totalItens} itens)`;
+    document.getElementById('resumoDiv').innerHTML = `<div class="ok">📊 Notas: ${dados.notas.length} | Itens: ${totalItens}</div>`;
 }
 
 function copiarEAN(ean) {
@@ -268,11 +214,12 @@ function copiarEAN(ean) {
 
 let scanner = document.getElementById('scannerInput');
 scanner.addEventListener('input', function(e) {
-    let codigo = e.target.value.trim();
-    if (codigo.length >= 10 && /^\d+$/.test(codigo) && codigo !== ultimoCodigo && !processando) {
-        ultimoCodigo = codigo;
+    let cod = e.target.value.trim();
+    // Aceita códigos de 10 a 14 dígitos (EAN)
+    if (cod.length >= 10 && cod.length <= 14 && /^\d+$/.test(cod) && cod !== ultimoCodigo && !processando) {
+        ultimoCodigo = cod;
         processando = true;
-        setTimeout(() => processarEAN(codigo), 50);
+        setTimeout(() => processarEAN(cod), 30);
     }
 });
 
@@ -286,9 +233,9 @@ function processarEAN(cod) {
                 let msg = item.conf === item.qtd ? '✅ CONFERIDO' : (item.conf > item.qtd ? '⚠️ SOBRA' : '🔄 PARCIAL');
                 let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#ed8936' : '#4299e1');
                 document.getElementById('scanResultDiv').innerHTML = `<div style="background:${cor}; color:white; padding:10px; border-radius:5px;">📦 ${item.desc}<br>📊 ${item.conf}/${item.qtd} - ${msg}</div>`;
-                setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 2000);
+                setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
                 atualizarTudo();
-                salvarProgresso(); // Salva após cada escaneamento!
+                salvarProgresso();
                 break;
             }
         }
@@ -296,125 +243,49 @@ function processarEAN(cod) {
     }
     if (!achou) {
         document.getElementById('scanResultDiv').innerHTML = `<div style="background:#e53e3e; color:white; padding:10px; border-radius:5px;">❌ Código ${cod} não encontrado!</div>`;
-        setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 2000);
+        setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
     }
     scanner.value = '';
     scanner.focus();
     setTimeout(() => { processando = false; ultimoCodigo = ''; }, 100);
 }
 
-document.getElementById('relatorioBtn').onclick = function() {
-    let html = `
-        <h2 style="text-align:center;">📊 RELATÓRIO DE DIVERGÊNCIAS</h2>
-        <hr>
-        <p><strong>Data da Carga:</strong> ${dados.data}</p>
-        <p><strong>Lacre:</strong> ${dados.lacre}</p>
-        <p><strong>Loja:</strong> ${dados.lojaNum} - ${dados.lojaNome}</p>
-        <p><strong>Operador:</strong> ${dados.operador}</p>
-        <p><strong>Placa Veículo:</strong> ${dados.placa}</p>
-        <hr>
-    `;
-    
-    let totalPrejuizoGeral = 0;
-    let totalFaltaGeral = 0;
-    let totalSobraGeral = 0;
-    
+document.getElementById('relatorioBtn').onclick = () => {
+    let html = `<h2>RELATÓRIO DE DIVERGÊNCIAS</h2><hr><p>Data: ${dados.data} | Lacre: ${dados.lacre}</p><p>Loja: ${dados.lojaNum} - ${dados.lojaNome} | Operador: ${dados.operador} | Placa: ${dados.placa}</p><hr>`;
+    let totalPrejuizo = 0;
     for (let nota of dados.notas) {
-        let divergencias = [];
+        let divs = [];
         let prejuizoNota = 0;
-        let faltaNota = 0;
-        let sobraNota = 0;
-        
         for (let item of nota.itens) {
             let diff = item.conf - item.qtd;
             if (diff !== 0) {
-                let prejuizo = Math.abs(diff) * item.custo;
-                divergencias.push({
-                    codigo: item.codigo,
-                    descricao: item.desc,
-                    ean: item.ean,
-                    qtdNota: item.qtd,
-                    qtdConf: item.conf,
-                    diff: diff,
-                    tipo: diff < 0 ? 'FALTA' : 'SOBRA',
-                    prejuizo: prejuizo
-                });
-                if (diff < 0) {
-                    faltaNota += Math.abs(diff);
-                    totalFaltaGeral += Math.abs(diff);
-                } else {
-                    sobraNota += diff;
-                    totalSobraGeral += diff;
-                }
-                prejuizoNota += prejuizo;
-                totalPrejuizoGeral += prejuizo;
+                let prej = Math.abs(diff) * item.custo;
+                prejuizoNota += prej;
+                divs.push(`<tr>
+                    <td>${item.codigo}</td>
+                    <td>${item.desc.substring(0,35)}</td
+                    <td>${item.ean}</td>
+                    <td style="text-align:center">${item.qtd}</td>
+                    <td style="text-align:center">${item.conf}</td>
+                    <td style="text-align:center">${Math.abs(diff)}</td
+                    <td style="text-align:center">${diff<0?'FALTA':'SOBRA'}</td
+                    <td style="text-align:center">R$ ${prej.toFixed(2)}</td
+                </tr>`);
             }
         }
-        
-        if (divergencias.length === 0) {
-            html += `<div class="resumo-nota" style="background:#c6f6d5;">✅ NFe ${nota.nfe} - SEM DIVERGÊNCIAS</div>`;
-        } else {
-            html += `<div class="resumo-nota" style="background:#fed7d7;">🔴 NFe ${nota.nfe} - TOTAL FALTA: ${faltaNota} | TOTAL SOBRA: ${sobraNota} | PREJUÍZO: R$ ${prejuizoNota.toFixed(2)}</div>`;
-            html += `<table>
-                        <thead>
-                            <tr><th>Código</th><th>Descrição</th><th>EAN</th><th>Qtd Nota</th><th>Qtd Conferido</th><th>Diferença</th><th>Tipo</th><th>Prejuízo</th></tr>
-                        </thead>
-                        <tbody>`;
-            for (let div of divergencias) {
-                let cor = div.tipo === 'FALTA' ? '#e53e3e' : '#ed8936';
-                html += `<tr>
-                            <td>${div.codigo}</td>
-                            <td>${div.descricao.substring(0, 40)}</td>
-                            <td>${div.ean}</td>
-                            <td style="text-align:center">${div.qtdNota}</td>
-                            <td style="text-align:center">${div.qtdConf}</td>
-                            <td style="text-align:center; color:${cor}; font-weight:bold">${Math.abs(div.diff)}</td>
-                            <td style="text-align:center; color:${cor}; font-weight:bold">${div.tipo}</td>
-                            <td style="text-align:center">R$ ${div.prejuizo.toFixed(2)}</td
-                        </tr>`;
-            }
-            html += `</tbody></table>`;
+        if (divs.length) {
+            html += `<h3>NFe ${nota.nfe}</h3><table border="1"><tr><th>Código</th><th>Descrição</th><th>EAN</th><th>Nota</th><th>Conf</th><th>Dif</th><th>Tipo</th><th>Prejuízo</th></tr>${divs.join('')}</table><p>Prejuízo da nota: R$ ${prejuizoNota.toFixed(2)}</p>`;
+            totalPrejuizo += prejuizoNota;
         }
-        html += `<br>`;
     }
-    
-    html += `<hr>
-             <h3>📊 RESUMO GERAL</h3>
-             <p><strong>Total de itens com FALTA:</strong> ${totalFaltaGeral}</p>
-             <p><strong>Total de itens com SOBRA:</strong> ${totalSobraGeral}</p>
-             <p><strong>Prejuízo total estimado:</strong> R$ ${totalPrejuizoGeral.toFixed(2)}</p>
-             <hr>
-             <div style="text-align:center;"><p>___________________________________</p><p>Assinatura do Responsável</p></div>`;
-    
-    let win = window.open('', '_blank', 'width=1000,height=800,menubar=yes,toolbar=yes');
-    if (!win) { alert('Pop-up bloqueado! Permita pop-ups para este site.'); return; }
-    win.document.write(`<!DOCTYPE html><html><head><title>Relatório de Divergências</title><meta charset="UTF-8"><style>
-        body{font-family:Arial;margin:20px;} table{border-collapse:collapse;width:100%;margin:10px 0;} 
-        td,th{border:1px solid #aaa;padding:8px;text-align:left;} th{background:#1e3c72;color:white;} 
-        .resumo-nota{padding:10px;margin:10px 0;border-radius:5px;font-weight:bold;}
-        @media print{body{margin:0;padding:10px;}}
-    </style></head><body>${html}<script>window.onload=function(){setTimeout(function(){window.print();window.close();},500)}<\/script></body></html>`);
+    html += `<hr><h3>Prejuízo total: R$ ${totalPrejuizo.toFixed(2)}</h3>`;
+    let win = window.open('', '_blank');
+    win.document.write(`<html><head><title>Relatório</title><style>body{font-family:Arial;margin:20px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}th{background:#1e3c72;color:white}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);
     win.document.close();
 };
 
-document.getElementById('salvarProgressoBtn').onclick = function() { salvarProgresso(); };
-document.getElementById('encerrarBtn').onclick = function() { 
-    if (confirm('⚠️ ENCERRAR CARGA? Todos os dados serão apagados!')) {
-        localStorage.removeItem('conferenciaProgresso');
-        location.reload();
-    }
-};
-
-// Verificar se há progresso salvo ao carregar
-window.onload = function() {
-    if (localStorage.getItem('conferenciaProgresso')) {
-        if (confirm('🔄 Há uma conferência em andamento. Deseja restaurar?')) {
-            restaurarProgresso();
-        } else {
-            localStorage.removeItem('conferenciaProgresso');
-        }
-    }
-};
+document.getElementById('encerrarBtn').onclick = () => { if(confirm('Encerrar carga?')) { localStorage.removeItem('conferenciaProgresso'); location.reload(); } };
+window.onload = () => { if(localStorage.getItem('conferenciaProgresso')) if(confirm('Restaurar conferência?')) restaurarProgresso(); };
 </script>
 </body>
 </html>
