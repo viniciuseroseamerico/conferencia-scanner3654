@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Conferência - Scanner Auto</title>
+    <title>Conferência - Scanner por Câmera</title>
     <style>
         body { font-family: Arial; background: #1e3c72; padding: 20px; }
         .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
@@ -24,6 +24,39 @@
         th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
         th { background: #1e3c72; color: white; }
         .btn-salvar { background: #48bb78; }
+        .btn-camera { background: #ed8936; margin-left: 10px; }
+        .btn-camera:hover { background: #dd6b20; }
+        .camera-area { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); 
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .camera-area video {
+            width: 90%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+        .close-camera {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 50%;
+        }
+        @media (max-width: 768px) {
+            .btn-camera { width: auto; padding: 10px 15px; font-size: 14px; }
+            .scanner-input { font-size: 16px; }
+        }
     </style>
 </head>
 <body>
@@ -51,10 +84,15 @@
     </div>
     <div class="card"><div id="resumoDiv"></div></div>
     <div class="card">
-        <div style="background: #f0f4f8; padding: 10px; text-align: center; border-radius: 5px;">
-            🔍 Scanner automático - apenas escaneie!
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div style="flex: 1;">
+                <input type="text" id="scannerInput" class="scanner-input" placeholder="Digite ou escaneie o código..." autofocus>
+            </div>
+            <button id="cameraBtn" class="btn-camera">📷 CÂMERA</button>
         </div>
-        <input type="text" id="scannerInput" class="scanner-input" placeholder="Escaneie o código..." autofocus>
+        <div style="background: #f0f4f8; padding: 10px; text-align: center; border-radius: 5px; margin-top: 10px;">
+            🔍 Scanner automático - 13 dígitos
+        </div>
         <div id="scanResultDiv"></div>
     </div>
     <div class="card">
@@ -68,12 +106,26 @@
     </div>
 </div>
 
+<!-- Área da câmera -->
+<div id="cameraArea" class="camera-area">
+    <button class="close-camera" id="closeCameraBtn">✕</button>
+    <video id="video" autoplay playsinline></video>
+    <button id="capturarBtn" style="margin-top: 20px; background: #48bb78; padding: 15px 30px;">📸 CAPTURAR CÓDIGO</button>
+</div>
+
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js"></script>
 <script>
 let dados = { notas: [] };
 let ultimoCodigo = '';
 let processando = false;
+
+// Elementos da câmera
+const cameraArea = document.getElementById('cameraArea');
+const video = document.getElementById('video');
+let codeReader = null;
+let videoStream = null;
 
 function salvarProgresso() {
     if (dados.notas.length === 0) return;
@@ -117,7 +169,6 @@ document.getElementById('iniciarBtn').onclick = () => {
 function converterNumero(valor) {
     if (valor === undefined || valor === null) return 0;
     let str = String(valor).trim();
-    // Troca vírgula por ponto e remove pontos de milhar
     str = str.replace(/\./g, '').replace(',', '.');
     let num = parseFloat(str);
     return isNaN(num) ? 0 : num;
@@ -132,16 +183,12 @@ function extrairDadosExcel(data, fileName) {
     for (let i = 1; i < linhas.length; i++) {
         let linha = linhas[i];
         if (!linha || linha.length < 8) continue;
-        
         let ean = linha[3] ? String(linha[3]).trim() : '';
         let qtd = converterNumero(linha[7]);
         let valorTotal = converterNumero(linha[11]);
-        
         if (ean && ean !== 'SEM GTIN' && ean.length >= 10 && qtd > 0 && !eansMap.has(ean)) {
             eansMap.set(ean, {
-                ean: ean,
-                qtd: qtd,
-                valorTotal: valorTotal,
+                ean: ean, qtd: qtd, valorTotal: valorTotal,
                 custo: qtd > 0 ? valorTotal / qtd : 0,
                 codigo: linha[0] ? String(linha[0]).trim() : '',
                 desc: linha[1] ? String(linha[1]).trim().substring(0, 50) : '',
@@ -213,10 +260,10 @@ function copiarEAN(ean) {
     document.getElementById('scannerInput').focus();
 }
 
+// Scanner manual/teclado
 let scanner = document.getElementById('scannerInput');
 scanner.addEventListener('input', function(e) {
     let cod = e.target.value.trim();
-    // Aceita EXATAMENTE 13 dígitos (EAN padrão)
     if (cod.length === 13 && /^\d+$/.test(cod) && cod !== ultimoCodigo && !processando) {
         ultimoCodigo = cod;
         processando = true;
@@ -250,6 +297,59 @@ function processarEAN(cod) {
     scanner.focus();
     setTimeout(() => { processando = false; ultimoCodigo = ''; }, 100);
 }
+
+// FUNÇÕES DA CÂMERA
+async function iniciarCamera() {
+    try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = videoStream;
+        await video.play();
+        
+        codeReader = new ZXing.BrowserMultiFormatReader();
+        codeReader.decodeFromVideoElement(video, (result, err) => {
+            if (result) {
+                let codigo = result.getText();
+                if (codigo && codigo.length >= 10) {
+                    // Extrair apenas números do código
+                    let numeros = codigo.replace(/\D/g, '');
+                    if (numeros.length >= 10) {
+                        scanner.value = numeros;
+                        processarEAN(numeros);
+                        fecharCamera();
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao iniciar câmera:', error);
+        alert('Não foi possível acessar a câmera. Verifique as permissões.');
+    }
+}
+
+function fecharCamera() {
+    if (codeReader) {
+        codeReader.reset();
+        codeReader = null;
+    }
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+    }
+    cameraArea.style.display = 'none';
+}
+
+document.getElementById('cameraBtn').onclick = () => {
+    cameraArea.style.display = 'flex';
+    iniciarCamera();
+};
+
+document.getElementById('closeCameraBtn').onclick = () => {
+    fecharCamera();
+};
+
+document.getElementById('capturarBtn').onclick = () => {
+    alert('Aponte a câmera para o código de barras. O sistema detecta automaticamente!');
+};
 
 document.getElementById('relatorioBtn').onclick = () => {
     let html = `<h2>RELATÓRIO DE DIVERGÊNCIAS</h2><hr><p>Data: ${dados.data} | Lacre: ${dados.lacre}</p><p>Loja: ${dados.lojaNum} - ${dados.lojaNome} | Operador: ${dados.operador} | Placa: ${dados.placa}</p><hr>`;
