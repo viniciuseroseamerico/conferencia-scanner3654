@@ -117,6 +117,7 @@ document.getElementById('iniciarBtn').onclick = () => {
 function converterNumero(valor) {
     if (valor === undefined || valor === null) return 0;
     let str = String(valor).trim();
+    // Troca vírgula por ponto e remove pontos de milhar
     str = str.replace(/\./g, '').replace(',', '.');
     let num = parseFloat(str);
     return isNaN(num) ? 0 : num;
@@ -215,8 +216,8 @@ function copiarEAN(ean) {
 let scanner = document.getElementById('scannerInput');
 scanner.addEventListener('input', function(e) {
     let cod = e.target.value.trim();
-    // Aceita códigos de 10 a 14 dígitos (EAN)
-    if (cod.length >= 10 && cod.length <= 14 && /^\d+$/.test(cod) && cod !== ultimoCodigo && !processando) {
+    // Aceita EXATAMENTE 13 dígitos (EAN padrão)
+    if (cod.length === 13 && /^\d+$/.test(cod) && cod !== ultimoCodigo && !processando) {
         ultimoCodigo = cod;
         processando = true;
         setTimeout(() => processarEAN(cod), 30);
