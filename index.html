@@ -2,130 +2,306 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Conferência - Scanner por Câmera</title>
+    <title>Conferência de Mercadorias</title>
     <style>
-        body { font-family: Arial; background: #1e3c72; padding: 20px; }
-        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
-        button { background: #1e3c72; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        .drop-area { border: 2px dashed #1e3c72; padding: 30px; text-align: center; margin: 10px 0; cursor: pointer; background: #f8f9fa; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        .ok { background: #c6f6d5; padding: 10px; margin: 5px 0; border-left: 4px solid #48bb78; }
-        .erro { background: #fed7d7; padding: 10px; margin: 5px 0; border-left: 4px solid #e53e3e; }
-        .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
-        .form-group { flex: 1; min-width: 150px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-        h2 { margin-top: 0; }
-        .nota-card { border-left: 3px solid #1e3c72; padding: 10px; margin: 5px 0; background: #f0f0f0; border-radius: 5px; }
-        .ean-item { display: inline-block; background: #1e3c72; color: white; padding: 5px 10px; margin: 3px; border-radius: 3px; font-size: 11px; cursor: pointer; }
-        .progress-bar { background: #ddd; border-radius: 10px; height: 20px; overflow: hidden; margin: 10px 0; }
-        .progress-fill { background: #48bb78; height: 100%; width: 0%; }
-        .scanner-input { font-size: 18px; font-family: monospace; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-        th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
-        th { background: #1e3c72; color: white; }
-        .btn-salvar { background: #48bb78; }
-        .btn-camera { background: #ed8936; margin-left: 10px; }
-        .btn-camera:hover { background: #dd6b20; }
-        .camera-area { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); 
-            z-index: 1000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        /* TEMA ESCURO ESTILO SAP */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            padding: 20px;
         }
-        .camera-area video {
-            width: 90%;
-            max-width: 500px;
-            border-radius: 10px;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .close-camera {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
+        
+        /* Cards estilo SAP */
+        .card {
+            background: #16213e;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #0f3460;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .card-header {
+            background: #0f3460;
+            color: #e94560;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #1a1a2e;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Formulário */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+            font-size: 12px;
+        }
+        
+        .form-control, input {
+            width: 100%;
+            padding: 10px;
+            background: #0f3460;
+            border: 1px solid #2a4a7a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .form-control:focus, input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        
+        /* Botões */
+        button {
+            background: #e94560;
+            color: white;
+            padding: 10px 20px;
             border: none;
-            font-size: 24px;
+            border-radius: 4px;
             cursor: pointer;
-            padding: 10px 15px;
-            border-radius: 50%;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.3s;
         }
-        @media (max-width: 768px) {
-            .btn-camera { width: auto; padding: 10px 15px; font-size: 14px; }
-            .scanner-input { font-size: 16px; }
+        
+        button:hover {
+            background: #ff6b6b;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #0f3460;
+            border: 1px solid #e94560;
+        }
+        
+        .btn-secondary:hover {
+            background: #1a4a7a;
+        }
+        
+        .btn-danger {
+            background: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background: #e74c3c;
+        }
+        
+        /* Drop Area */
+        .drop-area {
+            border: 2px dashed #e94560;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 10px 0;
+            cursor: pointer;
+            background: #0f3460;
+            color: #e0e0e0;
+        }
+        
+        .drop-area.drag-over {
+            border-color: #48bb78;
+            background: #1a4a7a;
+        }
+        
+        /* Mensagens */
+        .ok {
+            background: #1a4a7a;
+            color: #48bb78;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #48bb78;
+            border-radius: 4px;
+        }
+        
+        .erro {
+            background: #1a4a7a;
+            color: #e94560;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #e94560;
+            border-radius: 4px;
+        }
+        
+        /* Notas e Progresso */
+        .nota-card {
+            background: #0f3460;
+            border-left: 4px solid #e94560;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+            color: #e0e0e0;
+        }
+        
+        .ean-item {
+            display: inline-block;
+            background: #e94560;
+            color: white;
+            padding: 4px 10px;
+            margin: 3px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        
+        .ean-item:hover {
+            background: #ff6b6b;
+        }
+        
+        .progress-bar {
+            background: #0f3460;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: #e94560;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .scanner-input {
+            font-size: 18px;
+            font-family: monospace;
+            background: #0f3460;
+            border: 1px solid #e94560;
+            color: #e0e0e0;
+        }
+        
+        /* Tabela Relatório */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 12px;
+        }
+        
+        th, td {
+            border: 1px solid #2a4a7a;
+            padding: 8px;
+            text-align: left;
+            color: #e0e0e0;
+        }
+        
+        th {
+            background: #0f3460;
+            color: #e94560;
+        }
+        
+        h2, h3 {
+            color: #e94560;
+        }
+        
+        p, label {
+            color: #e0e0e0;
+        }
+        
+        hr {
+            border-color: #2a4a7a;
         }
     </style>
 </head>
 <body>
-<div class="card">
-    <h2>📦 CONFERÊNCIA DE MERCADORIAS</h2>
-    <div class="form-row">
-        <div class="form-group"><label>📅 Data:</label><input type="date" id="data"></div>
-        <div class="form-group"><label>🔒 Lacre:</label><input type="text" id="lacre"></div>
-    </div>
-    <div class="form-row">
-        <div class="form-group"><label>🏢 Loja:</label><input type="text" id="lojaNum"></div>
-        <div class="form-group"><label>📛 Nome Loja:</label><input type="text" id="lojaNome"></div>
-    </div>
-    <div class="form-row">
-        <div class="form-group"><label>👤 Operador:</label><input type="text" id="operador"></div>
-        <div class="form-group"><label>🚛 Placa:</label><input type="text" id="placa"></div>
-    </div>
-    <button id="iniciarBtn">🚀 INICIAR</button>
-</div>
-
-<div id="conferenciaArea" style="display:none;">
+<div class="container">
     <div class="card">
-        <div id="dropArea" class="drop-area">📁 ARRASTE O ZIP OU EXCEL AQUI</div>
-        <div id="statusMsg"></div>
-    </div>
-    <div class="card"><div id="resumoDiv"></div></div>
-    <div class="card">
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <div style="flex: 1;">
-                <input type="text" id="scannerInput" class="scanner-input" placeholder="Digite ou escaneie o código..." autofocus>
+        <div class="card-header">📦 CONFERÊNCIA DE MERCADORIAS</div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group"><label>DATA:</label><input type="date" id="data" class="form-control"></div>
+                <div class="form-group"><label>LACRE:</label><input type="text" id="lacre" class="form-control" placeholder="Ex: 001558"></div>
             </div>
-            <button id="cameraBtn" class="btn-camera">📷 CÂMERA</button>
+            <div class="form-row">
+                <div class="form-group"><label>LOJA:</label><input type="text" id="lojaNum" class="form-control" placeholder="Nº Loja"></div>
+                <div class="form-group"><label>NOME LOJA:</label><input type="text" id="lojaNome" class="form-control" placeholder="Nome da Loja"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>OPERADOR:</label><input type="text" id="operador" class="form-control" placeholder="Nome do Operador"></div>
+                <div class="form-group"><label>PLACA:</label><input type="text" id="placa" class="form-control" placeholder="Placa do Veículo"></div>
+            </div>
+            <button id="iniciarBtn">▶ INICIAR CONFERÊNCIA</button>
         </div>
-        <div style="background: #f0f4f8; padding: 10px; text-align: center; border-radius: 5px; margin-top: 10px;">
-            🔍 Scanner automático - 13 dígitos
-        </div>
-        <div id="scanResultDiv"></div>
     </div>
-    <div class="card">
-        <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
-        <div id="progressoTexto" style="text-align:center;"></div>
-        <div id="notasDiv"></div>
-    </div>
-    <div class="card">
-        <button id="relatorioBtn">📄 RELATÓRIO</button>
-        <button id="encerrarBtn" style="background:#e53e3e;">🗑️ ENCERRAR</button>
-    </div>
-</div>
 
-<!-- Área da câmera -->
-<div id="cameraArea" class="camera-area">
-    <button class="close-camera" id="closeCameraBtn">✕</button>
-    <video id="video" autoplay playsinline></video>
-    <button id="capturarBtn" style="margin-top: 20px; background: #48bb78; padding: 15px 30px;">📸 CAPTURAR CÓDIGO</button>
+    <div id="conferenciaArea" style="display:none;">
+        <div class="card">
+            <div class="card-header">📁 IMPORTAR ARQUIVOS</div>
+            <div class="card-body">
+                <input type="file" id="fileUpload" accept=".xls,.xlsx,.zip" multiple style="width:100%; margin-bottom:10px;">
+                <button id="uploadBtn" style="background:#48bb78;">📤 CARREGAR</button>
+                <div id="uploadStatus" style="margin-top:10px;"></div>
+                <div id="dropArea" class="drop-area">📁 ARRASTE ARQUIVOS AQUI</div>
+                <div id="statusMsg"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">📊 RESUMO</div>
+            <div class="card-body"><div id="resumoDiv"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">🔍 SCANNER</div>
+            <div class="card-body">
+                <input type="text" id="scannerInput" class="scanner-input" placeholder="Escaneie o código EAN (13 dígitos)" autofocus>
+                <div id="scanResultDiv" style="margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">📈 PROGRESSO</div>
+            <div class="card-body">
+                <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
+                <div id="progressoTexto" style="text-align:center; margin:5px 0;"></div>
+                <div id="notasDiv"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">📑 FINALIZAR</div>
+            <div class="card-body">
+                <button id="relatorioBtn">📄 RELATÓRIO</button>
+                <button id="encerrarBtn" class="btn-danger">🗑️ ENCERRAR</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js"></script>
 <script>
 let dados = { notas: [] };
 let ultimoCodigo = '';
 let processando = false;
-
-// Elementos da câmera
-const cameraArea = document.getElementById('cameraArea');
-const video = document.getElementById('video');
-let codeReader = null;
-let videoStream = null;
 
 function salvarProgresso() {
     if (dados.notas.length === 0) return;
@@ -170,8 +346,7 @@ function converterNumero(valor) {
     if (valor === undefined || valor === null) return 0;
     let str = String(valor).trim();
     str = str.replace(/\./g, '').replace(',', '.');
-    let num = parseFloat(str);
-    return isNaN(num) ? 0 : num;
+    return parseFloat(str) || 0;
 }
 
 function extrairDadosExcel(data, fileName) {
@@ -188,7 +363,7 @@ function extrairDadosExcel(data, fileName) {
         let valorTotal = converterNumero(linha[11]);
         if (ean && ean !== 'SEM GTIN' && ean.length >= 10 && qtd > 0 && !eansMap.has(ean)) {
             eansMap.set(ean, {
-                ean: ean, qtd: qtd, valorTotal: valorTotal,
+                ean, qtd, valorTotal,
                 custo: qtd > 0 ? valorTotal / qtd : 0,
                 codigo: linha[0] ? String(linha[0]).trim() : '',
                 desc: linha[1] ? String(linha[1]).trim().substring(0, 50) : '',
@@ -199,29 +374,56 @@ function extrairDadosExcel(data, fileName) {
     return { nfe, itens: Array.from(eansMap.values()), fileName };
 }
 
+async function processarArquivos(files) {
+    let notas = [];
+    for (let file of files) {
+        let ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'zip') {
+            let zip = await JSZip.loadAsync(await file.arrayBuffer());
+            for (let [nome, arq] of Object.entries(zip.files)) {
+                if (!arq.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
+                    let nota = extrairDadosExcel(await arq.async('arraybuffer'), nome);
+                    if (nota.itens.length) notas.push(nota);
+                }
+            }
+        } else if (['xls', 'xlsx'].includes(ext)) {
+            let nota = extrairDadosExcel(await file.arrayBuffer(), file.name);
+            if (nota.itens.length) notas.push(nota);
+        }
+    }
+    return notas;
+}
+
+document.getElementById('uploadBtn').onclick = async () => {
+    let files = document.getElementById('fileUpload').files;
+    if (files.length === 0) {
+        document.getElementById('uploadStatus').innerHTML = '<div class="erro">❌ Selecione arquivos!</div>';
+        return;
+    }
+    document.getElementById('uploadStatus').innerHTML = '<div class="ok">⏳ Processando...</div>';
+    let notas = await processarArquivos(Array.from(files));
+    if (notas.length === 0) {
+        document.getElementById('uploadStatus').innerHTML = '<div class="erro">❌ Nenhum dado encontrado!</div>';
+        return;
+    }
+    dados.notas = notas;
+    document.getElementById('uploadStatus').innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas!</div>`;
+    atualizarTudo();
+    salvarProgresso();
+};
+
 let dropArea = document.getElementById('dropArea');
 dropArea.ondragover = e => e.preventDefault();
 dropArea.ondrop = async e => {
     e.preventDefault();
-    let file = e.dataTransfer.files[0];
-    if (!file) return;
-    let ext = file.name.split('.').pop().toLowerCase();
-    let notas = [];
-    
-    if (ext === 'zip') {
-        let zip = await JSZip.loadAsync(await file.arrayBuffer());
-        for (let [nome, arq] of Object.entries(zip.files)) {
-            if (!arq.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
-                let nota = extrairDadosExcel(await arq.async('arraybuffer'), nome);
-                if (nota.itens.length) notas.push(nota);
-            }
-        }
-    } else if (['xls', 'xlsx'].includes(ext)) {
-        let nota = extrairDadosExcel(await file.arrayBuffer(), file.name);
-        if (nota.itens.length) notas.push(nota);
+    let files = e.dataTransfer.files;
+    if (files.length === 0) return;
+    document.getElementById('statusMsg').innerHTML = '<div class="ok">⏳ Processando...</div>';
+    let notas = await processarArquivos(Array.from(files));
+    if (notas.length === 0) {
+        document.getElementById('statusMsg').innerHTML = '<div class="erro">❌ Nenhum dado encontrado!</div>';
+        return;
     }
-    
-    if (!notas.length) return document.getElementById('statusMsg').innerHTML = '<div class="erro">Nenhum dado encontrado!</div>';
     dados.notas = notas;
     document.getElementById('statusMsg').innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas!</div>`;
     atualizarTudo();
@@ -246,7 +448,7 @@ function atualizarTudo() {
         let eansHtml = nota.itens.map(item => `<span class="ean-item" onclick="copiarEAN('${item.ean}')">${item.ean}</span>`).join('');
         notasDiv.innerHTML += `<div class="nota-card"><strong>📄 NFe: ${nota.nfe}</strong> | Valor: R$ ${valorNota.toFixed(2)}<br>
             Itens: ${tConf}/${tItens} (${pct.toFixed(0)}%)<br>
-            <div class="progress-bar" style="height:6px;"><div style="background:#48bb78; width:${pct}%; height:6px;"></div></div>
+            <div class="progress-bar" style="height:6px;"><div style="background:#e94560; width:${pct}%; height:6px;"></div></div>
             <div><strong>EANs:</strong> ${eansHtml}</div></div>`;
     }
     let pctGeral = totalItens ? (totalConf / totalItens) * 100 : 0;
@@ -260,7 +462,6 @@ function copiarEAN(ean) {
     document.getElementById('scannerInput').focus();
 }
 
-// Scanner manual/teclado
 let scanner = document.getElementById('scannerInput');
 scanner.addEventListener('input', function(e) {
     let cod = e.target.value.trim();
@@ -278,9 +479,9 @@ function processarEAN(cod) {
             if (item.ean === cod) {
                 item.conf++;
                 achou = true;
-                let msg = item.conf === item.qtd ? '✅ CONFERIDO' : (item.conf > item.qtd ? '⚠️ SOBRA' : '🔄 PARCIAL');
-                let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#ed8936' : '#4299e1');
-                document.getElementById('scanResultDiv').innerHTML = `<div style="background:${cor}; color:white; padding:10px; border-radius:5px;">📦 ${item.desc}<br>📊 ${item.conf}/${item.qtd} - ${msg}</div>`;
+                let msg = item.conf === item.qtd ? 'CONFERIDO' : (item.conf > item.qtd ? 'SOBRA' : 'PARCIAL');
+                let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#e94560' : '#f39c12');
+                document.getElementById('scanResultDiv').innerHTML = `<div style="background:#1a4a7a; color:${cor}; padding:10px; border-radius:5px; border-left:4px solid ${cor};">📦 ${item.desc}<br>📊 ${item.conf}/${item.qtd} - ${msg}</div>`;
                 setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
                 atualizarTudo();
                 salvarProgresso();
@@ -290,7 +491,7 @@ function processarEAN(cod) {
         if (achou) break;
     }
     if (!achou) {
-        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#e53e3e; color:white; padding:10px; border-radius:5px;">❌ Código ${cod} não encontrado!</div>`;
+        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#1a4a7a; color:#e94560; padding:10px; border-radius:5px; border-left:4px solid #e94560;">❌ Código ${cod} não encontrado!</div>`;
         setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
     }
     scanner.value = '';
@@ -298,61 +499,8 @@ function processarEAN(cod) {
     setTimeout(() => { processando = false; ultimoCodigo = ''; }, 100);
 }
 
-// FUNÇÕES DA CÂMERA
-async function iniciarCamera() {
-    try {
-        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        video.srcObject = videoStream;
-        await video.play();
-        
-        codeReader = new ZXing.BrowserMultiFormatReader();
-        codeReader.decodeFromVideoElement(video, (result, err) => {
-            if (result) {
-                let codigo = result.getText();
-                if (codigo && codigo.length >= 10) {
-                    // Extrair apenas números do código
-                    let numeros = codigo.replace(/\D/g, '');
-                    if (numeros.length >= 10) {
-                        scanner.value = numeros;
-                        processarEAN(numeros);
-                        fecharCamera();
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Erro ao iniciar câmera:', error);
-        alert('Não foi possível acessar a câmera. Verifique as permissões.');
-    }
-}
-
-function fecharCamera() {
-    if (codeReader) {
-        codeReader.reset();
-        codeReader = null;
-    }
-    if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
-    }
-    cameraArea.style.display = 'none';
-}
-
-document.getElementById('cameraBtn').onclick = () => {
-    cameraArea.style.display = 'flex';
-    iniciarCamera();
-};
-
-document.getElementById('closeCameraBtn').onclick = () => {
-    fecharCamera();
-};
-
-document.getElementById('capturarBtn').onclick = () => {
-    alert('Aponte a câmera para o código de barras. O sistema detecta automaticamente!');
-};
-
 document.getElementById('relatorioBtn').onclick = () => {
-    let html = `<h2>RELATÓRIO DE DIVERGÊNCIAS</h2><hr><p>Data: ${dados.data} | Lacre: ${dados.lacre}</p><p>Loja: ${dados.lojaNum} - ${dados.lojaNome} | Operador: ${dados.operador} | Placa: ${dados.placa}</p><hr>`;
+    let html = `<h2>RELATÓRIO DE DIVERGÊNCIAS</h2><hr><p><strong>Data:</strong> ${dados.data} | <strong>Lacre:</strong> ${dados.lacre}</p><p><strong>Loja:</strong> ${dados.lojaNum} - ${dados.lojaNome} | <strong>Operador:</strong> ${dados.operador} | <strong>Placa:</strong> ${dados.placa}</p><hr>`;
     let totalPrejuizo = 0;
     for (let nota of dados.notas) {
         let divs = [];
@@ -375,17 +523,17 @@ document.getElementById('relatorioBtn').onclick = () => {
             }
         }
         if (divs.length) {
-            html += `<h3>NFe ${nota.nfe}</h3><table border="1"><tr><th>Código</th><th>Descrição</th><th>EAN</th><th>Nota</th><th>Conf</th><th>Dif</th><th>Tipo</th><th>Prejuízo</th></tr>${divs.join('')}</table><p>Prejuízo da nota: R$ ${prejuizoNota.toFixed(2)}</p>`;
+            html += `<h3>📄 NFe ${nota.nfe}</h3><table><tr><th>Código</th><th>Descrição</th><th>EAN</th><th>Nota</th><th>Conf</th><th>Dif</th><th>Tipo</th><th>Prejuízo</th></tr>${divs.join('')}<td><p>Prejuízo da nota: R$ ${prejuizoNota.toFixed(2)}</p>`;
             totalPrejuizo += prejuizoNota;
         }
     }
-    html += `<hr><h3>Prejuízo total: R$ ${totalPrejuizo.toFixed(2)}</h3>`;
+    html += `<hr><h3>📊 PREJUÍZO TOTAL: R$ ${totalPrejuizo.toFixed(2)}</h3>`;
     let win = window.open('', '_blank');
-    win.document.write(`<html><head><title>Relatório</title><style>body{font-family:Arial;margin:20px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}th{background:#1e3c72;color:white}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);
+    win.document.write(`<html><head><title>Relatório</title><style>body{font-family:Arial;margin:20px;background:#1a1a2e;color:#e0e0e0;}table{border-collapse:collapse;width:100%}td,th{border:1px solid #2a4a7a;padding:8px}th{background:#0f3460;color:#e94560}h2,h3{color:#e94560}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);
     win.document.close();
 };
 
-document.getElementById('encerrarBtn').onclick = () => { if(confirm('Encerrar carga?')) { localStorage.removeItem('conferenciaProgresso'); location.reload(); } };
+document.getElementById('encerrarBtn').onclick = () => { if(confirm('Encerrar carga? Todos os dados serão apagados!')) { localStorage.removeItem('conferenciaProgresso'); location.reload(); } };
 window.onload = () => { if(localStorage.getItem('conferenciaProgresso')) if(confirm('Restaurar conferência?')) restaurarProgresso(); };
 </script>
 </body>
