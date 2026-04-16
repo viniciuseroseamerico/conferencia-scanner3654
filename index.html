@@ -11,15 +11,178 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{font-family:Arial;background:#0f172a;color:#fff;margin:0}
-.container{max-width:1200px;margin:auto;padding:20px}
-.card{background:#020617;border:1px solid #1e293b;margin-bottom:15px;padding:15px;border-radius:6px}
-button{padding:10px;background:#2563eb;border:none;color:#fff;cursor:pointer;margin:5px}
-button:hover{opacity:0.9}
-input{padding:10px;margin:5px;background:#020617;border:1px solid #1e293b;color:#fff}
-.ok{color:#16a34a} .err{color:#dc2626} .warn{color:#f59e0b}
-#camera{width:300px;height:200px;background:#000;margin:10px 0}
-canvas{max-width:300px;margin:10px 0}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1300px;
+    margin: auto;
+}
+
+.card {
+    background: #020617;
+    border: 1px solid #1e293b;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.card h3 {
+    color: #2563eb;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button {
+    padding: 10px 20px;
+    background: #2563eb;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s;
+    margin: 5px;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+input {
+    padding: 10px;
+    margin: 5px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    color: #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.ok { color: #16a34a; }
+.err { color: #dc2626; }
+.warn { color: #f59e0b; }
+
+#camera {
+    width: 300px;
+    height: 200px;
+    background: #000;
+    margin: 10px 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+canvas {
+    max-width: 300px;
+    margin: 10px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 12px;
+}
+
+th, td {
+    border: 1px solid #1e293b;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: #0f172a;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+tr:hover {
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.status-falta {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.status-sobra {
+    color: #f59e0b;
+    font-weight: bold;
+}
+
+.status-nao-encontrado {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.nota-card {
+    border: 1px solid #1e293b;
+    margin: 15px 0;
+    padding: 15px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+}
+
+.progress-bar {
+    background: #1e293b;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-fill {
+    background: #2563eb;
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid #1e293b;
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 5px;
+    text-transform: uppercase;
+}
 </style>
 </head>
 
@@ -27,49 +190,72 @@ canvas{max-width:300px;margin:10px 0}
 <div class="container">
 
 <div class="card">
-<h3>📦 CONFERÊNCIA DE MERCADORIAS</h3>
-<input type="date" id="data">
-<input placeholder="Lacre" id="lacre">
-<input placeholder="Loja" id="loja">
-<input placeholder="Operador" id="operador">
-<button onclick="iniciar()">▶ Iniciar</button>
+    <h3>📦 CONFERÊNCIA DE MERCADORIAS</h3>
+    <input type="date" id="data">
+    <input placeholder="Lacre" id="lacre">
+    <input placeholder="Loja" id="loja">
+    <input placeholder="Operador" id="operador">
+    <button onclick="iniciar()">▶ Iniciar Conferência</button>
 </div>
 
 <div id="sistema" style="display:none">
 
-<div class="card">
-<h3>📁 IMPORTAR ARQUIVOS</h3>
-<input type="file" id="files" multiple accept=".xls,.xlsx,.zip">
-<div id="uploadStatus"></div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value" id="totalNotas">0</div>
+        <div class="stat-label">Notas Fiscais</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" id="totalItens">0</div>
+        <div class="stat-label">Total de Itens</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" id="itensConferidos">0</div>
+        <div class="stat-label">Itens Conferidos</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" id="progressoPercentual">0%</div>
+        <div class="stat-label">Progresso</div>
+    </div>
+</div>
+
+<div class="progress-bar">
+    <div class="progress-fill" id="progressoBar"></div>
 </div>
 
 <div class="card">
-<h3>🔍 SCANNER MANUAL</h3>
-<input id="scanner" placeholder="Digite ou escaneie o EAN">
-<div id="scanMsg"></div>
+    <h3>📁 IMPORTAR ARQUIVOS</h3>
+    <input type="file" id="files" multiple accept=".xls,.xlsx,.zip">
+    <div id="uploadStatus"></div>
 </div>
 
 <div class="card">
-<h3>📷 SCANNER COM CÂMERA</h3>
-<div id="camera"></div>
-<button onclick="iniciarCamera()">▶ Iniciar Câmera</button>
-<button onclick="pararCamera()">⏹ Parar Câmera</button>
+    <h3>🔍 SCANNER MANUAL</h3>
+    <input id="scanner" placeholder="Digite ou escaneie o EAN (13 dígitos)">
+    <div id="scanMsg"></div>
 </div>
 
 <div class="card">
-<h3>📊 PROGRESSO</h3>
-<canvas id="grafico" width="300" height="300"></canvas>
+    <h3>📷 SCANNER COM CÂMERA</h3>
+    <div id="camera"></div>
+    <button onclick="iniciarCamera()">▶ Iniciar Câmera</button>
+    <button onclick="pararCamera()">⏹ Parar Câmera</button>
 </div>
 
 <div class="card">
-<h3>📄 FINALIZAR</h3>
-<button onclick="gerarRelatorio()">📑 Gerar PDF</button>
-<button onclick="encerrar()" style="background:#dc2626">🔚 Encerrar</button>
+    <h3>📊 PROGRESSO DA CONFERÊNCIA</h3>
+    <canvas id="grafico" width="300" height="300"></canvas>
 </div>
 
 <div class="card">
-<h3>📋 RESUMO</h3>
-<div id="resumo"></div>
+    <h3>📄 FINALIZAR</h3>
+    <button onclick="gerarRelatorio()">📑 Gerar Relatório</button>
+    <button onclick="encerrar()" style="background:#dc2626">🔚 Encerrar</button>
+</div>
+
+<div class="card">
+    <h3>📋 RESUMO DAS NOTAS</h3>
+    <div id="resumo"></div>
 </div>
 
 </div>
@@ -79,389 +265,499 @@ canvas{max-width:300px;margin:10px 0}
 // ================= DADOS =================
 let dados = JSON.parse(localStorage.getItem('confSAP')) || {notas: [], fora: []};
 let chart;
+let cameraAtiva = false;
+
+// ================= ATUALIZAR ESTATÍSTICAS =================
+function atualizarStats() {
+    let totalNotas = dados.notas.length;
+    let totalItens = 0;
+    let itensConferidos = 0;
+    
+    for(let n = 0; n < dados.notas.length; n++){
+        for(let i = 0; i < dados.notas[n].itens.length; i++){
+            totalItens += dados.notas[n].itens[i].qtd;
+            itensConferidos += Math.min(dados.notas[n].itens[i].conf, dados.notas[n].itens[i].qtd);
+        }
+    }
+    
+    let percentual = totalItens > 0 ? (itensConferidos / totalItens * 100).toFixed(1) : 0;
+    
+    document.getElementById('totalNotas').innerHTML = totalNotas;
+    document.getElementById('totalItens').innerHTML = totalItens;
+    document.getElementById('itensConferidos').innerHTML = itensConferidos;
+    document.getElementById('progressoPercentual').innerHTML = percentual + '%';
+    document.getElementById('progressoBar').style.width = percentual + '%';
+}
 
 // ================= INICIAR =================
 function iniciar(){
-  let data = document.getElementById('data').value;
-  let lacre = document.getElementById('lacre').value;
-  let loja = document.getElementById('loja').value;
-  let operador = document.getElementById('operador').value;
-  
-  if(!data || !lacre || !loja || !operador){
-    alert('⚠️ Preencha todos os campos!');
-    return;
-  }
-  
-  document.getElementById('sistema').style.display = 'block';
-  document.getElementById('scanner').focus();
+    let data = document.getElementById('data').value;
+    let lacre = document.getElementById('lacre').value;
+    let loja = document.getElementById('loja').value;
+    let operador = document.getElementById('operador').value;
+    
+    if(!data || !lacre || !loja || !operador){
+        alert('⚠️ Preencha todos os campos!');
+        return;
+    }
+    
+    document.getElementById('sistema').style.display = 'block';
+    document.getElementById('scanner').focus();
 }
 
 // ================= EAN =================
 function ean(v){
-  let d = v.replace(/\D/g,'');
-  if(d.length === 13) return d;
-  if(d.length >= 10) return d;
-  return null;
+    let d = v.replace(/\D/g,'');
+    if(d.length === 13) return d;
+    if(d.length >= 10) return d;
+    return null;
 }
 
 // ================= PROCESSAR EXCEL =================
 function processarExcel(buffer, nomeArquivo){
-  try {
-    const wb = XLSX.read(buffer, {type:'array'});
-    const plan = wb.Sheets[wb.SheetNames[0]];
-    const linhas = XLSX.utils.sheet_to_json(plan, {header:1});
-    
-    if(!linhas || linhas.length < 2) return null;
-    
-    let itens = [];
-    
-    for(let i = 1; i < linhas.length; i++){
-      if(!linhas[i] || !linhas[i][3]) continue;
-      
-      let eanRaw = String(linhas[i][3]).trim();
-      let cod = ean(eanRaw);
-      if(!cod) continue;
-      
-      itens.push({
-        desc: linhas[i][1] || 'Sem descrição',
-        ean: cod,
-        qtd: Number(linhas[i][7]) || 0,
-        conf: 0,
-        codigo: linhas[i][0] || '',
-        valor: Number(linhas[i][11]) || 0
-      });
+    try {
+        const wb = XLSX.read(buffer, {type:'array'});
+        const plan = wb.Sheets[wb.SheetNames[0]];
+        const linhas = XLSX.utils.sheet_to_json(plan, {header:1});
+        
+        if(!linhas || linhas.length < 2) return null;
+        
+        let itens = [];
+        
+        for(let i = 1; i < linhas.length; i++){
+            if(!linhas[i] || !linhas[i][3]) continue;
+            
+            let eanRaw = String(linhas[i][3]).trim();
+            let cod = ean(eanRaw);
+            if(!cod) continue;
+            
+            itens.push({
+                desc: linhas[i][1] || 'Sem descrição',
+                ean: cod,
+                qtd: Number(linhas[i][7]) || 0,
+                conf: 0,
+                codigo: linhas[i][0] || '',
+                valor: Number(linhas[i][11]) || 0
+            });
+        }
+        
+        return {nome: nomeArquivo, itens: itens};
+    } catch(e){
+        console.error('Erro ao processar:', nomeArquivo, e);
+        return null;
     }
-    
-    return {nome: nomeArquivo, itens: itens};
-  } catch(e){
-    console.error('Erro ao processar:', nomeArquivo, e);
-    return null;
-  }
 }
 
 // ================= IMPORTAR ARQUIVOS =================
 document.getElementById('files').onchange = async function(){
-  let statusDiv = document.getElementById('uploadStatus');
-  statusDiv.innerHTML = '<span class="warn">⏳ Processando arquivos...</span>';
-  
-  dados.notas = [];
-  dados.fora = [];
-  let processados = 0;
-  
-  for(const file of this.files){
-    const extensao = file.name.split('.').pop().toLowerCase();
+    let statusDiv = document.getElementById('uploadStatus');
+    statusDiv.innerHTML = '<span class="warn">⏳ Processando arquivos...</span>';
     
-    // Arquivo Excel direto
-    if(extensao === 'xls' || extensao === 'xlsx'){
-      const buffer = await file.arrayBuffer();
-      const nota = processarExcel(buffer, file.name);
-      if(nota && nota.itens.length > 0){
-        dados.notas.push(nota);
-        processados++;
-      }
-    }
+    dados.notas = [];
+    dados.fora = [];
+    let processados = 0;
     
-    // Arquivo ZIP
-    else if(extensao === 'zip'){
-      try {
-        const zip = await JSZip.loadAsync(await file.arrayBuffer());
-        let encontrou = false;
+    for(const file of this.files){
+        const extensao = file.name.split('.').pop().toLowerCase();
         
-        for(const nomeArquivo in zip.files){
-          const arquivoZip = zip.files[nomeArquivo];
-          
-          // Pula pastas e arquivos MAC
-          if(arquivoZip.dir || nomeArquivo.startsWith('__MACOSX')) continue;
-          
-          const nomeLower = nomeArquivo.toLowerCase();
-          if(nomeLower.endsWith('.xlsx') || nomeLower.endsWith('.xls')){
-            try {
-              const buffer = await arquivoZip.async('arraybuffer');
-              const nota = processarExcel(buffer, nomeArquivo);
-              if(nota && nota.itens.length > 0){
+        if(extensao === 'xls' || extensao === 'xlsx'){
+            const buffer = await file.arrayBuffer();
+            const nota = processarExcel(buffer, file.name);
+            if(nota && nota.itens.length > 0){
                 dados.notas.push(nota);
-                encontrou = true;
-              }
-            } catch(e){
-              console.error('Erro no arquivo ZIP:', nomeArquivo, e);
+                processados++;
             }
-          }
         }
-        
-        if(encontrou) processados++;
-        else statusDiv.innerHTML = '<span class="warn">⚠️ ZIP sem arquivos Excel válidos</span>';
-        
-      } catch(e){
-        console.error('Erro ao ler ZIP:', e);
-        statusDiv.innerHTML = '<span class="err">❌ Erro ao ler arquivo ZIP</span>';
-      }
+        else if(extensao === 'zip'){
+            try {
+                const zip = await JSZip.loadAsync(await file.arrayBuffer());
+                let encontrou = false;
+                
+                for(const nomeArquivo in zip.files){
+                    const arquivoZip = zip.files[nomeArquivo];
+                    if(arquivoZip.dir || nomeArquivo.startsWith('__MACOSX')) continue;
+                    
+                    const nomeLower = nomeArquivo.toLowerCase();
+                    if(nomeLower.endsWith('.xlsx') || nomeLower.endsWith('.xls')){
+                        try {
+                            const buffer = await arquivoZip.async('arraybuffer');
+                            const nota = processarExcel(buffer, nomeArquivo);
+                            if(nota && nota.itens.length > 0){
+                                dados.notas.push(nota);
+                                encontrou = true;
+                            }
+                        } catch(e){
+                            console.error('Erro no arquivo ZIP:', nomeArquivo, e);
+                        }
+                    }
+                }
+                if(encontrou) processados++;
+            } catch(e){
+                console.error('Erro ao ler ZIP:', e);
+            }
+        }
     }
-  }
-  
-  if(processados > 0){
-    statusDiv.innerHTML = `<span class="ok">✅ ${processados} arquivo(s) processado(s) com sucesso!</span>`;
-  } else {
-    statusDiv.innerHTML = '<span class="err">❌ Nenhum arquivo válido encontrado!</span>';
-  }
-  
-  salvar();
-  render();
+    
+    if(processados > 0){
+        statusDiv.innerHTML = `<span class="ok">✅ ${processados} arquivo(s) processado(s) com sucesso!</span>`;
+    } else {
+        statusDiv.innerHTML = '<span class="err">❌ Nenhum arquivo válido encontrado!</span>';
+    }
+    
+    salvar();
+    render();
 };
 
 // ================= SCANNER =================
 const scannerInput = document.getElementById('scanner');
 scannerInput.addEventListener('keypress', function(e){
-  if(e.key === 'Enter'){
-    processarEAN(scannerInput.value);
-    scannerInput.value = '';
-  }
+    if(e.key === 'Enter'){
+        processarEAN(scannerInput.value);
+        scannerInput.value = '';
+    }
 });
 
 function processarEAN(codigo){
-  let achou = false;
-  let scanMsg = document.getElementById('scanMsg');
-  
-  for(let n = 0; n < dados.notas.length; n++){
-    for(let i = 0; i < dados.notas[n].itens.length; i++){
-      let item = dados.notas[n].itens[i];
-      if(item.ean === codigo && item.conf < item.qtd){
-        item.conf++;
-        achou = true;
-        break;
-      }
+    let achou = false;
+    let scanMsg = document.getElementById('scanMsg');
+    
+    for(let n = 0; n < dados.notas.length; n++){
+        for(let i = 0; i < dados.notas[n].itens.length; i++){
+            let item = dados.notas[n].itens[i];
+            if(item.ean === codigo && item.conf < item.qtd){
+                item.conf++;
+                achou = true;
+                break;
+            }
+        }
+        if(achou) break;
     }
-    if(achou) break;
-  }
-  
-  if(achou){
-    scanMsg.innerHTML = '<span class="ok">✅ Código conferido com sucesso!</span>';
-  } else {
-    // Verifica se já está na lista de fora
-    let existe = false;
-    for(let f = 0; f < dados.fora.length; f++){
-      if(dados.fora[f].ean === codigo){
-        dados.fora[f].qtd++;
-        existe = true;
-        break;
-      }
+    
+    if(achou){
+        scanMsg.innerHTML = '<span class="ok">✅ Código conferido com sucesso!</span>';
+    } else {
+        let existe = false;
+        for(let f = 0; f < dados.fora.length; f++){
+            if(dados.fora[f].ean === codigo){
+                dados.fora[f].qtd++;
+                existe = true;
+                break;
+            }
+        }
+        if(!existe){
+            dados.fora.push({ean: codigo, qtd: 1});
+        }
+        scanMsg.innerHTML = '<span class="warn">⚠️ Código NÃO ENCONTRADO na nota fiscal!</span>';
     }
-    if(!existe){
-      dados.fora.push({ean: codigo, qtd: 1});
-    }
-    scanMsg.innerHTML = '<span class="warn">⚠️ Código não encontrado na nota fiscal!</span>';
-  }
-  
-  setTimeout(() => { scanMsg.innerHTML = ''; }, 2000);
-  salvar();
-  render();
+    
+    setTimeout(() => { scanMsg.innerHTML = ''; }, 2000);
+    salvar();
+    render();
 }
 
 // ================= CAMERA =================
-let cameraAtiva = false;
-
 function iniciarCamera(){
-  if(cameraAtiva) return;
-  
-  Quagga.init({
-    inputStream: {
-      type: "LiveStream",
-      target: document.getElementById('camera'),
-      constraints: {
-        width: 300,
-        height: 200,
-        facingMode: "environment"
-      }
-    },
-    decoder: {
-      readers: ["ean_reader", "ean_8_reader"]
-    }
-  }, function(err){
-    if(err){
-      console.error(err);
-      alert("Erro ao iniciar câmera");
-      return;
-    }
-    Quagga.start();
-    cameraAtiva = true;
-  });
-  
-  Quagga.onDetected(function(data){
-    if(data && data.codeResult && data.codeResult.code){
-      processarEAN(data.codeResult.code);
-    }
-  });
+    if(cameraAtiva) return;
+    
+    Quagga.init({
+        inputStream: {
+            type: "LiveStream",
+            target: document.getElementById('camera'),
+            constraints: {
+                width: 300,
+                height: 200,
+                facingMode: "environment"
+            }
+        },
+        decoder: { readers: ["ean_reader", "ean_8_reader"] }
+    }, function(err){
+        if(err){
+            alert("Erro ao iniciar câmera");
+            return;
+        }
+        Quagga.start();
+        cameraAtiva = true;
+    });
+    
+    Quagga.onDetected(function(data){
+        if(data && data.codeResult && data.codeResult.code){
+            processarEAN(data.codeResult.code);
+        }
+    });
 }
 
 function pararCamera(){
-  if(cameraAtiva){
-    Quagga.stop();
-    cameraAtiva = false;
-  }
+    if(cameraAtiva){
+        Quagga.stop();
+        cameraAtiva = false;
+    }
 }
 
 // ================= GRAFICO =================
 function atualizarGrafico(){
-  let total = 0;
-  let conf = 0;
-  
-  for(let n = 0; n < dados.notas.length; n++){
-    for(let i = 0; i < dados.notas[n].itens.length; i++){
-      total += dados.notas[n].itens[i].qtd;
-      conf += dados.notas[n].itens[i].conf;
+    let total = 0;
+    let conf = 0;
+    
+    for(let n = 0; n < dados.notas.length; n++){
+        for(let i = 0; i < dados.notas[n].itens.length; i++){
+            total += dados.notas[n].itens[i].qtd;
+            conf += Math.min(dados.notas[n].itens[i].conf, dados.notas[n].itens[i].qtd);
+        }
     }
-  }
-  
-  let ctx = document.getElementById('grafico').getContext('2d');
-  
-  if(chart) chart.destroy();
-  
-  chart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Conferidos (' + conf + ')', 'Faltam (' + (total - conf) + ')'],
-      datasets: [{
-        data: [conf, total - conf],
-        backgroundColor: ['#16a34a', '#dc2626'],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: 'bottom', labels: { color: '#fff' } }
-      }
-    }
-  });
+    
+    let falta = total - conf;
+    let ctx = document.getElementById('grafico').getContext('2d');
+    
+    if(chart) chart.destroy();
+    
+    chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Conferidos (' + conf + ')', 'Faltam (' + falta + ')'],
+            datasets: [{
+                data: [conf, falta],
+                backgroundColor: ['#16a34a', '#dc2626'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#e5e7eb' } }
+            }
+        }
+    });
 }
 
 // ================= RENDER =================
 function render(){
-  let resumoDiv = document.getElementById('resumo');
-  let h = '';
-  
-  if(dados.notas.length === 0){
-    h = '<p style="color:#94a3b8;">Nenhuma nota carregada. Importe arquivos Excel ou ZIP.</p>';
-  } else {
-    for(let n = 0; n < dados.notas.length; n++){
-      let nota = dados.notas[n];
-      let totalNota = 0;
-      let confNota = 0;
-      
-      for(let i = 0; i < nota.itens.length; i++){
-        totalNota += nota.itens[i].qtd;
-        confNota += nota.itens[i].conf;
-      }
-      
-      let percentual = totalNota > 0 ? (confNota / totalNota * 100).toFixed(1) : 0;
-      
-      h += `<div style="border:1px solid #1e293b; margin:10px 0; padding:10px; border-radius:6px;">`;
-      h += `<strong>📄 ${nota.nome}</strong>`;
-      h += `<span style="float:right">${percentual}% (${confNota}/${totalNota})</span>`;
-      h += `<div style="background:#1e293b; height:6px; margin:10px 0; border-radius:3px;">`;
-      h += `<div style="background:#2563eb; width:${percentual}%; height:6px; border-radius:3px;"></div></div>`;
-      
-      for(let i = 0; i < nota.itens.length; i++){
-        let item = nota.itens[i];
-        let status = item.conf >= item.qtd ? '✅' : '⚠️';
-        h += `<div style="font-size:12px; margin:5px 0;">${status} ${item.ean} - ${item.desc.substring(0,30)} - ${item.conf}/${item.qtd}</div>`;
-      }
-      h += `</div>`;
+    let resumoDiv = document.getElementById('resumo');
+    let h = '';
+    
+    if(dados.notas.length === 0){
+        h = '<p style="color:#94a3b8;">Nenhuma nota carregada. Importe arquivos Excel ou ZIP.</p>';
+    } else {
+        for(let n = 0; n < dados.notas.length; n++){
+            let nota = dados.notas[n];
+            let totalNota = 0;
+            let confNota = 0;
+            
+            for(let i = 0; i < nota.itens.length; i++){
+                totalNota += nota.itens[i].qtd;
+                confNota += Math.min(nota.itens[i].conf, nota.itens[i].qtd);
+            }
+            
+            let percentual = totalNota > 0 ? (confNota / totalNota * 100).toFixed(1) : 0;
+            
+            h += `<div class="nota-card">`;
+            h += `<strong>📄 ${nota.nome}</strong>`;
+            h += `<span style="float:right">${percentual}% (${confNota}/${totalNota})</span>`;
+            h += `<div class="progress-bar" style="margin:10px 0;"><div class="progress-fill" style="width:${percentual}%"></div></div>`;
+            
+            // Tabela de itens da nota
+            h += `<table>`;
+            h += `<thead><tr><th>Código</th><th>Descrição</th><th>EAN</th><th>Qtd Nota</th><th>Qtd Conf</th><th>Status</th></tr></thead>`;
+            h += `<tbody>`;
+            
+            for(let i = 0; i < nota.itens.length; i++){
+                let item = nota.itens[i];
+                let dif = item.conf - item.qtd;
+                let status = '';
+                let statusClass = '';
+                
+                if(dif < 0){
+                    status = `FALTA (${Math.abs(dif)})`;
+                    statusClass = 'status-falta';
+                } else if(dif > 0){
+                    status = `SOBRA (${dif})`;
+                    statusClass = 'status-sobra';
+                } else {
+                    status = 'OK';
+                    statusClass = 'ok';
+                }
+                
+                h += `<tr>`;
+                h += `<td>${item.codigo || '-'}</td>`;
+                h += `<td>${item.desc.substring(0, 40)}</td>`;
+                h += `<td>${item.ean}</td>`;
+                h += `<td style="text-align:center">${item.qtd}</td>`;
+                h += `<td style="text-align:center">${item.conf}</td>`;
+                h += `<td class="${statusClass}">${status}</td>`;
+                h += `</tr>`;
+            }
+            
+            h += `</tbody></table></div>`;
+        }
     }
-  }
-  
-  if(dados.fora.length > 0){
-    h += `<div style="border-left:3px solid #f59e0b; margin:10px 0; padding:10px;">`;
-    h += `<strong>⚠️ Códigos não cadastrados:</strong><br>`;
-    for(let f = 0; f < dados.fora.length; f++){
-      h += `${dados.fora[f].ean} (${dados.fora[f].qtd}x)<br>`;
+    
+    // Itens não encontrados (escaneados fora da nota)
+    if(dados.fora.length > 0){
+        h += `<div class="nota-card" style="border-left-color: #dc2626;">`;
+        h += `<strong style="color:#dc2626">⚠️ CÓDIGOS ESCANEADOS NÃO ENCONTRADOS NAS NOTAS</strong>`;
+        h += `<table>`;
+        h += `<thead><tr><th>Código EAN</th><th>Quantidade Escaneada</th><th>Status</th></tr></thead>`;
+        h += `<tbody>`;
+        
+        for(let f = 0; f < dados.fora.length; f++){
+            h += `<tr>`;
+            h += `<td>${dados.fora[f].ean}</td>`;
+            h += `<td style="text-align:center">${dados.fora[f].qtd}</td>`;
+            h += `<td class="status-nao-encontrado">NÃO ENCONTRADO</td>`;
+            h += `</tr>`;
+        }
+        
+        h += `</tbody></table></div>`;
     }
-    h += `</div>`;
-  }
-  
-  resumoDiv.innerHTML = h;
-  atualizarGrafico();
+    
+    resumoDiv.innerHTML = h;
+    atualizarStats();
+    atualizarGrafico();
 }
 
-// ================= PDF =================
+// ================= GERAR RELATÓRIO =================
 function gerarRelatorio(){
-  const { jsPDF } = window.jspdf;
-  let doc = new jsPDF();
-  let y = 20;
-  
-  doc.setFontSize(16);
-  doc.text("Relatório de Conferência", 10, y);
-  y += 10;
-  
-  doc.setFontSize(10);
-  doc.text("Data: " + (document.getElementById('data').value || 'N/A'), 10, y);
-  y += 5;
-  doc.text("Lacre: " + (document.getElementById('lacre').value || 'N/A'), 10, y);
-  y += 5;
-  doc.text("Loja: " + (document.getElementById('loja').value || 'N/A'), 10, y);
-  y += 5;
-  doc.text("Operador: " + (document.getElementById('operador').value || 'N/A'), 10, y);
-  y += 10;
-  
-  for(let n = 0; n < dados.notas.length; n++){
-    let nota = dados.notas[n];
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+    let y = 20;
     
-    if(y > 270){
-      doc.addPage();
-      y = 20;
+    // Cabeçalho
+    doc.setFontSize(16);
+    doc.text("RELATÓRIO DE CONFERÊNCIA", 10, y);
+    y += 10;
+    
+    doc.setFontSize(10);
+    doc.text("Data: " + (document.getElementById('data').value || 'N/A'), 10, y);
+    y += 6;
+    doc.text("Lacre: " + (document.getElementById('lacre').value || 'N/A'), 10, y);
+    y += 6;
+    doc.text("Loja: " + (document.getElementById('loja').value || 'N/A'), 10, y);
+    y += 6;
+    doc.text("Operador: " + (document.getElementById('operador').value || 'N/A'), 10, y);
+    y += 12;
+    
+    // Estatísticas gerais
+    let totalItens = 0;
+    let totalConf = 0;
+    for(let n = 0; n < dados.notas.length; n++){
+        for(let i = 0; i < dados.notas[n].itens.length; i++){
+            totalItens += dados.notas[n].itens[i].qtd;
+            totalConf += Math.min(dados.notas[n].itens[i].conf, dados.notas[n].itens[i].qtd);
+        }
     }
     
-    doc.text("Arquivo: " + nota.nome, 10, y);
-    y += 5;
+    doc.text(`Total de Itens: ${totalItens}`, 10, y);
+    y += 6;
+    doc.text(`Itens Conferidos: ${totalConf}`, 10, y);
+    y += 6;
+    doc.text(`Progresso: ${totalItens > 0 ? (totalConf / totalItens * 100).toFixed(1) : 0}%`, 10, y);
+    y += 12;
     
-    for(let i = 0; i < nota.itens.length; i++){
-      let item = nota.itens[i];
-      let status = item.conf >= item.qtd ? 'OK' : 'PENDENTE';
-      let texto = `${item.ean} - ${item.desc.substring(0,30)} - ${item.conf}/${item.qtd} - ${status}`;
-      
-      if(y > 280){
-        doc.addPage();
-        y = 20;
-      }
-      
-      doc.text(texto, 15, y);
-      y += 5;
+    // Divergências por nota
+    for(let n = 0; n < dados.notas.length; n++){
+        let nota = dados.notas[n];
+        let temDivergencia = false;
+        let divergencias = [];
+        
+        for(let i = 0; i < nota.itens.length; i++){
+            let item = nota.itens[i];
+            let dif = item.conf - item.qtd;
+            if(dif !== 0){
+                temDivergencia = true;
+                divergencias.push({
+                    codigo: item.codigo,
+                    desc: item.desc,
+                    ean: item.ean,
+                    qtdNota: item.qtd,
+                    qtdConf: item.conf,
+                    tipo: dif < 0 ? 'FALTA' : 'SOBRA',
+                    quantidade: Math.abs(dif),
+                    valorUnitario: item.valor,
+                    prejuizo: Math.abs(dif) * item.valor
+                });
+            }
+        }
+        
+        if(temDivergencia){
+            if(y > 250){
+                doc.addPage();
+                y = 20;
+            }
+            
+            doc.setFontSize(12);
+            doc.text(`📄 ${nota.nome}`, 10, y);
+            y += 8;
+            
+            doc.setFontSize(8);
+            doc.text("Código | Descrição | EAN | Qtd Nota | Qtd Conf | Status | Quantidade | Prejuízo", 10, y);
+            y += 5;
+            
+            for(let d of divergencias){
+                if(y > 280){
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                let linha = `${d.codigo} | ${d.desc.substring(0,25)} | ${d.ean} | ${d.qtdNota} | ${d.qtdConf} | ${d.tipo} | ${d.quantidade} | R$ ${d.prejuizo.toFixed(2)}`;
+                doc.text(linha, 12, y);
+                y += 5;
+            }
+            y += 8;
+        }
     }
-    y += 5;
-  }
-  
-  if(dados.fora.length > 0){
-    doc.text("Códigos não cadastrados:", 10, y);
-    y += 5;
-    for(let f = 0; f < dados.fora.length; f++){
-      doc.text(`${dados.fora[f].ean} (${dados.fora[f].qtd}x)`, 15, y);
-      y += 5;
+    
+    // Itens não encontrados
+    if(dados.fora.length > 0){
+        if(y > 250){
+            doc.addPage();
+            y = 20;
+        }
+        
+        doc.setFontSize(12);
+        doc.text("⚠️ CÓDIGOS NÃO ENCONTRADOS NAS NOTAS", 10, y);
+        y += 8;
+        
+        doc.setFontSize(9);
+        doc.text("Código EAN | Quantidade", 10, y);
+        y += 5;
+        
+        for(let f = 0; f < dados.fora.length; f++){
+            if(y > 280){
+                doc.addPage();
+                y = 20;
+            }
+            doc.text(`${dados.fora[f].ean} | ${dados.fora[f].qtd}`, 12, y);
+            y += 5;
+        }
     }
-  }
-  
-  doc.save("conferencia_" + new Date().toISOString().slice(0,19) + ".pdf");
+    
+    if(y === 20 + (dados.notas.length > 0 ? 50 : 0)){
+        doc.text("Nenhuma divergência encontrada. Conferência OK!", 10, y);
+    }
+    
+    doc.save("conferencia_" + new Date().toISOString().slice(0,19) + ".pdf");
 }
 
 // ================= SALVAR =================
 function salvar(){
-  localStorage.setItem('confSAP', JSON.stringify(dados));
+    localStorage.setItem('confSAP', JSON.stringify(dados));
 }
 
 // ================= ENCERRAR =================
 function encerrar(){
-  if(confirm('⚠️ Deseja encerrar a conferência?\nO relatório será gerado antes de limpar os dados.')){
-    gerarRelatorio();
-    localStorage.removeItem('confSAP');
-    setTimeout(() => location.reload(), 1000);
-  }
+    if(confirm('⚠️ Deseja encerrar a conferência?\nO relatório será gerado antes de limpar os dados.')){
+        gerarRelatorio();
+        localStorage.removeItem('confSAP');
+        setTimeout(() => location.reload(), 1000);
+    }
 }
 
 // ================= FOCO =================
 setInterval(() => {
-  let sistema = document.getElementById('sistema');
-  let scanner = document.getElementById('scanner');
-  if(sistema && sistema.style.display === 'block'){
-    scanner.focus();
-  }
+    let sistema = document.getElementById('sistema');
+    let scanner = document.getElementById('scanner');
+    if(sistema && sistema.style.display === 'block'){
+        scanner.focus();
+    }
 }, 500);
 
 // Inicializar
