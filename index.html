@@ -1,540 +1,472 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Conferência de Mercadorias</title>
-    <style>
-        /* TEMA ESCURO ESTILO SAP */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a2e;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        /* Cards estilo SAP */
-        .card {
-            background: #16213e;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            overflow: hidden;
-            border: 1px solid #0f3460;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        
-        .card-header {
-            background: #0f3460;
-            color: #e94560;
-            padding: 12px 20px;
-            font-weight: bold;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #1a1a2e;
-        }
-        
-        .card-body {
-            padding: 20px;
-        }
-        
-        /* Formulário */
-        .form-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .form-group {
-            flex: 1;
-            min-width: 180px;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #e0e0e0;
-            font-size: 12px;
-        }
-        
-        .form-control, input {
-            width: 100%;
-            padding: 10px;
-            background: #0f3460;
-            border: 1px solid #2a4a7a;
-            border-radius: 4px;
-            color: #e0e0e0;
-            font-size: 14px;
-        }
-        
-        .form-control:focus, input:focus {
-            outline: none;
-            border-color: #e94560;
-        }
-        
-        /* Botões */
-        button {
-            background: #e94560;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            background: #ff6b6b;
-            transform: translateY(-1px);
-        }
-        
-        .btn-secondary {
-            background: #0f3460;
-            border: 1px solid #e94560;
-        }
-        
-        .btn-secondary:hover {
-            background: #1a4a7a;
-        }
-        
-        .btn-danger {
-            background: #c0392b;
-        }
-        
-        .btn-danger:hover {
-            background: #e74c3c;
-        }
-        
-        /* Drop Area */
-        .drop-area {
-            border: 2px dashed #e94560;
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            margin: 10px 0;
-            cursor: pointer;
-            background: #0f3460;
-            color: #e0e0e0;
-        }
-        
-        .drop-area.drag-over {
-            border-color: #48bb78;
-            background: #1a4a7a;
-        }
-        
-        /* Mensagens */
-        .ok {
-            background: #1a4a7a;
-            color: #48bb78;
-            padding: 10px;
-            margin: 5px 0;
-            border-left: 4px solid #48bb78;
-            border-radius: 4px;
-        }
-        
-        .erro {
-            background: #1a4a7a;
-            color: #e94560;
-            padding: 10px;
-            margin: 5px 0;
-            border-left: 4px solid #e94560;
-            border-radius: 4px;
-        }
-        
-        /* Notas e Progresso */
-        .nota-card {
-            background: #0f3460;
-            border-left: 4px solid #e94560;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 4px;
-            color: #e0e0e0;
-        }
-        
-        .ean-item {
-            display: inline-block;
-            background: #e94560;
-            color: white;
-            padding: 4px 10px;
-            margin: 3px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            font-family: monospace;
-        }
-        
-        .ean-item:hover {
-            background: #ff6b6b;
-        }
-        
-        .progress-bar {
-            background: #0f3460;
-            border-radius: 10px;
-            height: 20px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        
-        .progress-fill {
-            background: #e94560;
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .scanner-input {
-            font-size: 18px;
-            font-family: monospace;
-            background: #0f3460;
-            border: 1px solid #e94560;
-            color: #e0e0e0;
-        }
-        
-        /* Tabela Relatório */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-            font-size: 12px;
-        }
-        
-        th, td {
-            border: 1px solid #2a4a7a;
-            padding: 8px;
-            text-align: left;
-            color: #e0e0e0;
-        }
-        
-        th {
-            background: #0f3460;
-            color: #e94560;
-        }
-        
-        h2, h3 {
-            color: #e94560;
-        }
-        
-        p, label {
-            color: #e0e0e0;
-        }
-        
-        hr {
-            border-color: #2a4a7a;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="card">
-        <div class="card-header">📦 CONFERÊNCIA DE MERCADORIAS</div>
-        <div class="card-body">
-            <div class="form-row">
-                <div class="form-group"><label>DATA:</label><input type="date" id="data" class="form-control"></div>
-                <div class="form-group"><label>LACRE:</label><input type="text" id="lacre" class="form-control" placeholder="Ex: 001558"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>LOJA:</label><input type="text" id="lojaNum" class="form-control" placeholder="Nº Loja"></div>
-                <div class="form-group"><label>NOME LOJA:</label><input type="text" id="lojaNome" class="form-control" placeholder="Nome da Loja"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>OPERADOR:</label><input type="text" id="operador" class="form-control" placeholder="Nome do Operador"></div>
-                <div class="form-group"><label>PLACA:</label><input type="text" id="placa" class="form-control" placeholder="Placa do Veículo"></div>
-            </div>
-            <button id="iniciarBtn">▶ INICIAR CONFERÊNCIA</button>
-        </div>
-    </div>
-
-    <div id="conferenciaArea" style="display:none;">
-        <div class="card">
-            <div class="card-header">📁 IMPORTAR ARQUIVOS</div>
-            <div class="card-body">
-                <input type="file" id="fileUpload" accept=".xls,.xlsx,.zip" multiple style="width:100%; margin-bottom:10px;">
-                <button id="uploadBtn" style="background:#48bb78;">📤 CARREGAR</button>
-                <div id="uploadStatus" style="margin-top:10px;"></div>
-                <div id="dropArea" class="drop-area">📁 ARRASTE ARQUIVOS AQUI</div>
-                <div id="statusMsg"></div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">📊 RESUMO</div>
-            <div class="card-body"><div id="resumoDiv"></div></div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">🔍 SCANNER</div>
-            <div class="card-body">
-                <input type="text" id="scannerInput" class="scanner-input" placeholder="Escaneie o código EAN (13 dígitos)" autofocus>
-                <div id="scanResultDiv" style="margin-top:10px;"></div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">📈 PROGRESSO</div>
-            <div class="card-body">
-                <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
-                <div id="progressoTexto" style="text-align:center; margin:5px 0;"></div>
-                <div id="notasDiv"></div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">📑 FINALIZAR</div>
-            <div class="card-body">
-                <button id="relatorioBtn">📄 RELATÓRIO</button>
-                <button id="encerrarBtn" class="btn-danger">🗑️ ENCERRAR</button>
-            </div>
-        </div>
-    </div>
-</div>
+<meta charset="UTF-8">
+<title>Conferência PRO</title>
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{font-family:Arial;background:#0f172a;color:#fff;margin:0}
+.container{max-width:1200px;margin:auto;padding:20px}
+.card{background:#020617;border:1px solid #1e293b;margin-bottom:15px;padding:15px;border-radius:6px}
+button{padding:10px;background:#2563eb;border:none;color:#fff;cursor:pointer;margin:5px}
+button:hover{opacity:0.9}
+input{padding:10px;margin:5px;background:#020617;border:1px solid #1e293b;color:#fff}
+.ok{color:#16a34a} .err{color:#dc2626} .warn{color:#f59e0b}
+#camera{width:300px;height:200px;background:#000;margin:10px 0}
+canvas{max-width:300px;margin:10px 0}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="card">
+<h3>📦 CONFERÊNCIA DE MERCADORIAS</h3>
+<input type="date" id="data">
+<input placeholder="Lacre" id="lacre">
+<input placeholder="Loja" id="loja">
+<input placeholder="Operador" id="operador">
+<button onclick="iniciar()">▶ Iniciar</button>
+</div>
+
+<div id="sistema" style="display:none">
+
+<div class="card">
+<h3>📁 IMPORTAR ARQUIVOS</h3>
+<input type="file" id="files" multiple accept=".xls,.xlsx,.zip">
+<div id="uploadStatus"></div>
+</div>
+
+<div class="card">
+<h3>🔍 SCANNER MANUAL</h3>
+<input id="scanner" placeholder="Digite ou escaneie o EAN">
+<div id="scanMsg"></div>
+</div>
+
+<div class="card">
+<h3>📷 SCANNER COM CÂMERA</h3>
+<div id="camera"></div>
+<button onclick="iniciarCamera()">▶ Iniciar Câmera</button>
+<button onclick="pararCamera()">⏹ Parar Câmera</button>
+</div>
+
+<div class="card">
+<h3>📊 PROGRESSO</h3>
+<canvas id="grafico" width="300" height="300"></canvas>
+</div>
+
+<div class="card">
+<h3>📄 FINALIZAR</h3>
+<button onclick="gerarRelatorio()">📑 Gerar PDF</button>
+<button onclick="encerrar()" style="background:#dc2626">🔚 Encerrar</button>
+</div>
+
+<div class="card">
+<h3>📋 RESUMO</h3>
+<div id="resumo"></div>
+</div>
+
+</div>
+</div>
+
 <script>
-let dados = { notas: [] };
-let ultimoCodigo = '';
-let processando = false;
+// ================= DADOS =================
+let dados = JSON.parse(localStorage.getItem('confSAP')) || {notas: [], fora: []};
+let chart;
 
-function salvarProgresso() {
-    if (dados.notas.length === 0) return;
-    localStorage.setItem('conferenciaProgresso', JSON.stringify({ dados, timestamp: new Date().toISOString() }));
+// ================= INICIAR =================
+function iniciar(){
+  let data = document.getElementById('data').value;
+  let lacre = document.getElementById('lacre').value;
+  let loja = document.getElementById('loja').value;
+  let operador = document.getElementById('operador').value;
+  
+  if(!data || !lacre || !loja || !operador){
+    alert('⚠️ Preencha todos os campos!');
+    return;
+  }
+  
+  document.getElementById('sistema').style.display = 'block';
+  document.getElementById('scanner').focus();
 }
 
-function restaurarProgresso() {
-    let salvo = localStorage.getItem('conferenciaProgresso');
-    if (!salvo) return false;
-    let progresso = JSON.parse(salvo);
-    if (confirm(`Restaurar conferência de ${new Date(progresso.timestamp).toLocaleString()}?`)) {
-        dados = progresso.dados;
-        document.getElementById('data').value = dados.data || '';
-        document.getElementById('lacre').value = dados.lacre || '';
-        document.getElementById('lojaNum').value = dados.lojaNum || '';
-        document.getElementById('lojaNome').value = dados.lojaNome || '';
-        document.getElementById('operador').value = dados.operador || '';
-        document.getElementById('placa').value = dados.placa || '';
-        document.querySelector('.card').style.display = 'none';
-        document.getElementById('conferenciaArea').style.display = 'block';
-        atualizarTudo();
-        document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ Progresso restaurado!</div>';
-        return true;
-    }
-    return false;
+// ================= EAN =================
+function ean(v){
+  let d = v.replace(/\D/g,'');
+  if(d.length === 13) return d;
+  if(d.length >= 10) return d;
+  return null;
 }
 
-document.getElementById('iniciarBtn').onclick = () => {
-    let data = document.getElementById('data').value;
-    let lacre = document.getElementById('lacre').value;
-    let lojaNum = document.getElementById('lojaNum').value;
-    let lojaNome = document.getElementById('lojaNome').value;
-    let operador = document.getElementById('operador').value;
-    let placa = document.getElementById('placa').value;
-    if (!data || !lacre || !lojaNum || !lojaNome || !operador) return alert('Preencha todos os campos');
-    dados = { data, lacre, lojaNum, lojaNome, operador, placa: placa || 'N/A', notas: [] };
-    document.querySelector('.card').style.display = 'none';
-    document.getElementById('conferenciaArea').style.display = 'block';
-};
-
-function converterNumero(valor) {
-    if (valor === undefined || valor === null) return 0;
-    let str = String(valor).trim();
-    str = str.replace(/\./g, '').replace(',', '.');
-    return parseFloat(str) || 0;
-}
-
-function extrairDadosExcel(data, fileName) {
-    let workbook = XLSX.read(data, { type: 'array' });
-    let linhas = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, defval: "" });
-    let nfe = (linhas[0] && linhas[0][3]) ? String(linhas[0][3]).trim() : 'NFE_' + Date.now();
-    let itens = [], eansMap = new Map();
+// ================= PROCESSAR EXCEL =================
+function processarExcel(buffer, nomeArquivo){
+  try {
+    const wb = XLSX.read(buffer, {type:'array'});
+    const plan = wb.Sheets[wb.SheetNames[0]];
+    const linhas = XLSX.utils.sheet_to_json(plan, {header:1});
     
-    for (let i = 1; i < linhas.length; i++) {
-        let linha = linhas[i];
-        if (!linha || linha.length < 8) continue;
-        let ean = linha[3] ? String(linha[3]).trim() : '';
-        let qtd = converterNumero(linha[7]);
-        let valorTotal = converterNumero(linha[11]);
-        if (ean && ean !== 'SEM GTIN' && ean.length >= 10 && qtd > 0 && !eansMap.has(ean)) {
-            eansMap.set(ean, {
-                ean, qtd, valorTotal,
-                custo: qtd > 0 ? valorTotal / qtd : 0,
-                codigo: linha[0] ? String(linha[0]).trim() : '',
-                desc: linha[1] ? String(linha[1]).trim().substring(0, 50) : '',
-                conf: 0
-            });
-        }
+    if(!linhas || linhas.length < 2) return null;
+    
+    let itens = [];
+    
+    for(let i = 1; i < linhas.length; i++){
+      if(!linhas[i] || !linhas[i][3]) continue;
+      
+      let eanRaw = String(linhas[i][3]).trim();
+      let cod = ean(eanRaw);
+      if(!cod) continue;
+      
+      itens.push({
+        desc: linhas[i][1] || 'Sem descrição',
+        ean: cod,
+        qtd: Number(linhas[i][7]) || 0,
+        conf: 0,
+        codigo: linhas[i][0] || '',
+        valor: Number(linhas[i][11]) || 0
+      });
     }
-    return { nfe, itens: Array.from(eansMap.values()), fileName };
+    
+    return {nome: nomeArquivo, itens: itens};
+  } catch(e){
+    console.error('Erro ao processar:', nomeArquivo, e);
+    return null;
+  }
 }
 
-async function processarArquivos(files) {
-    let notas = [];
-    for (let file of files) {
-        let ext = file.name.split('.').pop().toLowerCase();
-        if (ext === 'zip') {
-            let zip = await JSZip.loadAsync(await file.arrayBuffer());
-            for (let [nome, arq] of Object.entries(zip.files)) {
-                if (!arq.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
-                    let nota = extrairDadosExcel(await arq.async('arraybuffer'), nome);
-                    if (nota.itens.length) notas.push(nota);
-                }
+// ================= IMPORTAR ARQUIVOS =================
+document.getElementById('files').onchange = async function(){
+  let statusDiv = document.getElementById('uploadStatus');
+  statusDiv.innerHTML = '<span class="warn">⏳ Processando arquivos...</span>';
+  
+  dados.notas = [];
+  dados.fora = [];
+  let processados = 0;
+  
+  for(const file of this.files){
+    const extensao = file.name.split('.').pop().toLowerCase();
+    
+    // Arquivo Excel direto
+    if(extensao === 'xls' || extensao === 'xlsx'){
+      const buffer = await file.arrayBuffer();
+      const nota = processarExcel(buffer, file.name);
+      if(nota && nota.itens.length > 0){
+        dados.notas.push(nota);
+        processados++;
+      }
+    }
+    
+    // Arquivo ZIP
+    else if(extensao === 'zip'){
+      try {
+        const zip = await JSZip.loadAsync(await file.arrayBuffer());
+        let encontrou = false;
+        
+        for(const nomeArquivo in zip.files){
+          const arquivoZip = zip.files[nomeArquivo];
+          
+          // Pula pastas e arquivos MAC
+          if(arquivoZip.dir || nomeArquivo.startsWith('__MACOSX')) continue;
+          
+          const nomeLower = nomeArquivo.toLowerCase();
+          if(nomeLower.endsWith('.xlsx') || nomeLower.endsWith('.xls')){
+            try {
+              const buffer = await arquivoZip.async('arraybuffer');
+              const nota = processarExcel(buffer, nomeArquivo);
+              if(nota && nota.itens.length > 0){
+                dados.notas.push(nota);
+                encontrou = true;
+              }
+            } catch(e){
+              console.error('Erro no arquivo ZIP:', nomeArquivo, e);
             }
-        } else if (['xls', 'xlsx'].includes(ext)) {
-            let nota = extrairDadosExcel(await file.arrayBuffer(), file.name);
-            if (nota.itens.length) notas.push(nota);
+          }
         }
+        
+        if(encontrou) processados++;
+        else statusDiv.innerHTML = '<span class="warn">⚠️ ZIP sem arquivos Excel válidos</span>';
+        
+      } catch(e){
+        console.error('Erro ao ler ZIP:', e);
+        statusDiv.innerHTML = '<span class="err">❌ Erro ao ler arquivo ZIP</span>';
+      }
     }
-    return notas;
-}
-
-document.getElementById('uploadBtn').onclick = async () => {
-    let files = document.getElementById('fileUpload').files;
-    if (files.length === 0) {
-        document.getElementById('uploadStatus').innerHTML = '<div class="erro">❌ Selecione arquivos!</div>';
-        return;
-    }
-    document.getElementById('uploadStatus').innerHTML = '<div class="ok">⏳ Processando...</div>';
-    let notas = await processarArquivos(Array.from(files));
-    if (notas.length === 0) {
-        document.getElementById('uploadStatus').innerHTML = '<div class="erro">❌ Nenhum dado encontrado!</div>';
-        return;
-    }
-    dados.notas = notas;
-    document.getElementById('uploadStatus').innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas!</div>`;
-    atualizarTudo();
-    salvarProgresso();
+  }
+  
+  if(processados > 0){
+    statusDiv.innerHTML = `<span class="ok">✅ ${processados} arquivo(s) processado(s) com sucesso!</span>`;
+  } else {
+    statusDiv.innerHTML = '<span class="err">❌ Nenhum arquivo válido encontrado!</span>';
+  }
+  
+  salvar();
+  render();
 };
 
-let dropArea = document.getElementById('dropArea');
-dropArea.ondragover = e => e.preventDefault();
-dropArea.ondrop = async e => {
-    e.preventDefault();
-    let files = e.dataTransfer.files;
-    if (files.length === 0) return;
-    document.getElementById('statusMsg').innerHTML = '<div class="ok">⏳ Processando...</div>';
-    let notas = await processarArquivos(Array.from(files));
-    if (notas.length === 0) {
-        document.getElementById('statusMsg').innerHTML = '<div class="erro">❌ Nenhum dado encontrado!</div>';
-        return;
-    }
-    dados.notas = notas;
-    document.getElementById('statusMsg').innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas!</div>`;
-    atualizarTudo();
-    salvarProgresso();
-};
-
-function atualizarTudo() {
-    let totalItens = 0, totalConf = 0;
-    let notasDiv = document.getElementById('notasDiv');
-    notasDiv.innerHTML = '';
-    
-    for (let nota of dados.notas) {
-        let tItens = 0, tConf = 0, valorNota = 0;
-        for (let item of nota.itens) {
-            tItens += item.qtd;
-            tConf += Math.min(item.conf, item.qtd);
-            valorNota += item.valorTotal;
-        }
-        totalItens += tItens;
-        totalConf += tConf;
-        let pct = tItens ? (tConf / tItens) * 100 : 0;
-        let eansHtml = nota.itens.map(item => `<span class="ean-item" onclick="copiarEAN('${item.ean}')">${item.ean}</span>`).join('');
-        notasDiv.innerHTML += `<div class="nota-card"><strong>📄 NFe: ${nota.nfe}</strong> | Valor: R$ ${valorNota.toFixed(2)}<br>
-            Itens: ${tConf}/${tItens} (${pct.toFixed(0)}%)<br>
-            <div class="progress-bar" style="height:6px;"><div style="background:#e94560; width:${pct}%; height:6px;"></div></div>
-            <div><strong>EANs:</strong> ${eansHtml}</div></div>`;
-    }
-    let pctGeral = totalItens ? (totalConf / totalItens) * 100 : 0;
-    document.getElementById('progressoBar').style.width = pctGeral + '%';
-    document.getElementById('progressoTexto').innerHTML = `${pctGeral.toFixed(1)}% (${totalConf}/${totalItens} itens)`;
-    document.getElementById('resumoDiv').innerHTML = `<div class="ok">📊 Notas: ${dados.notas.length} | Itens: ${totalItens}</div>`;
-}
-
-function copiarEAN(ean) {
-    document.getElementById('scannerInput').value = ean;
-    document.getElementById('scannerInput').focus();
-}
-
-let scanner = document.getElementById('scannerInput');
-scanner.addEventListener('input', function(e) {
-    let cod = e.target.value.trim();
-    if (cod.length === 13 && /^\d+$/.test(cod) && cod !== ultimoCodigo && !processando) {
-        ultimoCodigo = cod;
-        processando = true;
-        setTimeout(() => processarEAN(cod), 30);
-    }
+// ================= SCANNER =================
+const scannerInput = document.getElementById('scanner');
+scannerInput.addEventListener('keypress', function(e){
+  if(e.key === 'Enter'){
+    processarEAN(scannerInput.value);
+    scannerInput.value = '';
+  }
 });
 
-function processarEAN(cod) {
-    let achou = false;
-    for (let nota of dados.notas) {
-        for (let item of nota.itens) {
-            if (item.ean === cod) {
-                item.conf++;
-                achou = true;
-                let msg = item.conf === item.qtd ? 'CONFERIDO' : (item.conf > item.qtd ? 'SOBRA' : 'PARCIAL');
-                let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#e94560' : '#f39c12');
-                document.getElementById('scanResultDiv').innerHTML = `<div style="background:#1a4a7a; color:${cor}; padding:10px; border-radius:5px; border-left:4px solid ${cor};">📦 ${item.desc}<br>📊 ${item.conf}/${item.qtd} - ${msg}</div>`;
-                setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
-                atualizarTudo();
-                salvarProgresso();
-                break;
-            }
-        }
-        if (achou) break;
+function processarEAN(codigo){
+  let achou = false;
+  let scanMsg = document.getElementById('scanMsg');
+  
+  for(let n = 0; n < dados.notas.length; n++){
+    for(let i = 0; i < dados.notas[n].itens.length; i++){
+      let item = dados.notas[n].itens[i];
+      if(item.ean === codigo && item.conf < item.qtd){
+        item.conf++;
+        achou = true;
+        break;
+      }
     }
-    if (!achou) {
-        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#1a4a7a; color:#e94560; padding:10px; border-radius:5px; border-left:4px solid #e94560;">❌ Código ${cod} não encontrado!</div>`;
-        setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
+    if(achou) break;
+  }
+  
+  if(achou){
+    scanMsg.innerHTML = '<span class="ok">✅ Código conferido com sucesso!</span>';
+  } else {
+    // Verifica se já está na lista de fora
+    let existe = false;
+    for(let f = 0; f < dados.fora.length; f++){
+      if(dados.fora[f].ean === codigo){
+        dados.fora[f].qtd++;
+        existe = true;
+        break;
+      }
     }
-    scanner.value = '';
-    scanner.focus();
-    setTimeout(() => { processando = false; ultimoCodigo = ''; }, 100);
+    if(!existe){
+      dados.fora.push({ean: codigo, qtd: 1});
+    }
+    scanMsg.innerHTML = '<span class="warn">⚠️ Código não encontrado na nota fiscal!</span>';
+  }
+  
+  setTimeout(() => { scanMsg.innerHTML = ''; }, 2000);
+  salvar();
+  render();
 }
 
-document.getElementById('relatorioBtn').onclick = () => {
-    let html = `<h2>RELATÓRIO DE DIVERGÊNCIAS</h2><hr><p><strong>Data:</strong> ${dados.data} | <strong>Lacre:</strong> ${dados.lacre}</p><p><strong>Loja:</strong> ${dados.lojaNum} - ${dados.lojaNome} | <strong>Operador:</strong> ${dados.operador} | <strong>Placa:</strong> ${dados.placa}</p><hr>`;
-    let totalPrejuizo = 0;
-    for (let nota of dados.notas) {
-        let divs = [];
-        let prejuizoNota = 0;
-        for (let item of nota.itens) {
-            let diff = item.conf - item.qtd;
-            if (diff !== 0) {
-                let prej = Math.abs(diff) * item.custo;
-                prejuizoNota += prej;
-                divs.push(`<tr>
-                    <td>${item.codigo}</td>
-                    <td>${item.desc.substring(0,35)}</td
-                    <td>${item.ean}</td>
-                    <td style="text-align:center">${item.qtd}</td>
-                    <td style="text-align:center">${item.conf}</td>
-                    <td style="text-align:center">${Math.abs(diff)}</td
-                    <td style="text-align:center">${diff<0?'FALTA':'SOBRA'}</td
-                    <td style="text-align:center">R$ ${prej.toFixed(2)}</td
-                </tr>`);
-            }
-        }
-        if (divs.length) {
-            html += `<h3>📄 NFe ${nota.nfe}</h3><table><tr><th>Código</th><th>Descrição</th><th>EAN</th><th>Nota</th><th>Conf</th><th>Dif</th><th>Tipo</th><th>Prejuízo</th></tr>${divs.join('')}<td><p>Prejuízo da nota: R$ ${prejuizoNota.toFixed(2)}</p>`;
-            totalPrejuizo += prejuizoNota;
-        }
-    }
-    html += `<hr><h3>📊 PREJUÍZO TOTAL: R$ ${totalPrejuizo.toFixed(2)}</h3>`;
-    let win = window.open('', '_blank');
-    win.document.write(`<html><head><title>Relatório</title><style>body{font-family:Arial;margin:20px;background:#1a1a2e;color:#e0e0e0;}table{border-collapse:collapse;width:100%}td,th{border:1px solid #2a4a7a;padding:8px}th{background:#0f3460;color:#e94560}h2,h3{color:#e94560}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);
-    win.document.close();
-};
+// ================= CAMERA =================
+let cameraAtiva = false;
 
-document.getElementById('encerrarBtn').onclick = () => { if(confirm('Encerrar carga? Todos os dados serão apagados!')) { localStorage.removeItem('conferenciaProgresso'); location.reload(); } };
-window.onload = () => { if(localStorage.getItem('conferenciaProgresso')) if(confirm('Restaurar conferência?')) restaurarProgresso(); };
+function iniciarCamera(){
+  if(cameraAtiva) return;
+  
+  Quagga.init({
+    inputStream: {
+      type: "LiveStream",
+      target: document.getElementById('camera'),
+      constraints: {
+        width: 300,
+        height: 200,
+        facingMode: "environment"
+      }
+    },
+    decoder: {
+      readers: ["ean_reader", "ean_8_reader"]
+    }
+  }, function(err){
+    if(err){
+      console.error(err);
+      alert("Erro ao iniciar câmera");
+      return;
+    }
+    Quagga.start();
+    cameraAtiva = true;
+  });
+  
+  Quagga.onDetected(function(data){
+    if(data && data.codeResult && data.codeResult.code){
+      processarEAN(data.codeResult.code);
+    }
+  });
+}
+
+function pararCamera(){
+  if(cameraAtiva){
+    Quagga.stop();
+    cameraAtiva = false;
+  }
+}
+
+// ================= GRAFICO =================
+function atualizarGrafico(){
+  let total = 0;
+  let conf = 0;
+  
+  for(let n = 0; n < dados.notas.length; n++){
+    for(let i = 0; i < dados.notas[n].itens.length; i++){
+      total += dados.notas[n].itens[i].qtd;
+      conf += dados.notas[n].itens[i].conf;
+    }
+  }
+  
+  let ctx = document.getElementById('grafico').getContext('2d');
+  
+  if(chart) chart.destroy();
+  
+  chart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Conferidos (' + conf + ')', 'Faltam (' + (total - conf) + ')'],
+      datasets: [{
+        data: [conf, total - conf],
+        backgroundColor: ['#16a34a', '#dc2626'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#fff' } }
+      }
+    }
+  });
+}
+
+// ================= RENDER =================
+function render(){
+  let resumoDiv = document.getElementById('resumo');
+  let h = '';
+  
+  if(dados.notas.length === 0){
+    h = '<p style="color:#94a3b8;">Nenhuma nota carregada. Importe arquivos Excel ou ZIP.</p>';
+  } else {
+    for(let n = 0; n < dados.notas.length; n++){
+      let nota = dados.notas[n];
+      let totalNota = 0;
+      let confNota = 0;
+      
+      for(let i = 0; i < nota.itens.length; i++){
+        totalNota += nota.itens[i].qtd;
+        confNota += nota.itens[i].conf;
+      }
+      
+      let percentual = totalNota > 0 ? (confNota / totalNota * 100).toFixed(1) : 0;
+      
+      h += `<div style="border:1px solid #1e293b; margin:10px 0; padding:10px; border-radius:6px;">`;
+      h += `<strong>📄 ${nota.nome}</strong>`;
+      h += `<span style="float:right">${percentual}% (${confNota}/${totalNota})</span>`;
+      h += `<div style="background:#1e293b; height:6px; margin:10px 0; border-radius:3px;">`;
+      h += `<div style="background:#2563eb; width:${percentual}%; height:6px; border-radius:3px;"></div></div>`;
+      
+      for(let i = 0; i < nota.itens.length; i++){
+        let item = nota.itens[i];
+        let status = item.conf >= item.qtd ? '✅' : '⚠️';
+        h += `<div style="font-size:12px; margin:5px 0;">${status} ${item.ean} - ${item.desc.substring(0,30)} - ${item.conf}/${item.qtd}</div>`;
+      }
+      h += `</div>`;
+    }
+  }
+  
+  if(dados.fora.length > 0){
+    h += `<div style="border-left:3px solid #f59e0b; margin:10px 0; padding:10px;">`;
+    h += `<strong>⚠️ Códigos não cadastrados:</strong><br>`;
+    for(let f = 0; f < dados.fora.length; f++){
+      h += `${dados.fora[f].ean} (${dados.fora[f].qtd}x)<br>`;
+    }
+    h += `</div>`;
+  }
+  
+  resumoDiv.innerHTML = h;
+  atualizarGrafico();
+}
+
+// ================= PDF =================
+function gerarRelatorio(){
+  const { jsPDF } = window.jspdf;
+  let doc = new jsPDF();
+  let y = 20;
+  
+  doc.setFontSize(16);
+  doc.text("Relatório de Conferência", 10, y);
+  y += 10;
+  
+  doc.setFontSize(10);
+  doc.text("Data: " + (document.getElementById('data').value || 'N/A'), 10, y);
+  y += 5;
+  doc.text("Lacre: " + (document.getElementById('lacre').value || 'N/A'), 10, y);
+  y += 5;
+  doc.text("Loja: " + (document.getElementById('loja').value || 'N/A'), 10, y);
+  y += 5;
+  doc.text("Operador: " + (document.getElementById('operador').value || 'N/A'), 10, y);
+  y += 10;
+  
+  for(let n = 0; n < dados.notas.length; n++){
+    let nota = dados.notas[n];
+    
+    if(y > 270){
+      doc.addPage();
+      y = 20;
+    }
+    
+    doc.text("Arquivo: " + nota.nome, 10, y);
+    y += 5;
+    
+    for(let i = 0; i < nota.itens.length; i++){
+      let item = nota.itens[i];
+      let status = item.conf >= item.qtd ? 'OK' : 'PENDENTE';
+      let texto = `${item.ean} - ${item.desc.substring(0,30)} - ${item.conf}/${item.qtd} - ${status}`;
+      
+      if(y > 280){
+        doc.addPage();
+        y = 20;
+      }
+      
+      doc.text(texto, 15, y);
+      y += 5;
+    }
+    y += 5;
+  }
+  
+  if(dados.fora.length > 0){
+    doc.text("Códigos não cadastrados:", 10, y);
+    y += 5;
+    for(let f = 0; f < dados.fora.length; f++){
+      doc.text(`${dados.fora[f].ean} (${dados.fora[f].qtd}x)`, 15, y);
+      y += 5;
+    }
+  }
+  
+  doc.save("conferencia_" + new Date().toISOString().slice(0,19) + ".pdf");
+}
+
+// ================= SALVAR =================
+function salvar(){
+  localStorage.setItem('confSAP', JSON.stringify(dados));
+}
+
+// ================= ENCERRAR =================
+function encerrar(){
+  if(confirm('⚠️ Deseja encerrar a conferência?\nO relatório será gerado antes de limpar os dados.')){
+    gerarRelatorio();
+    localStorage.removeItem('confSAP');
+    setTimeout(() => location.reload(), 1000);
+  }
+}
+
+// ================= FOCO =================
+setInterval(() => {
+  let sistema = document.getElementById('sistema');
+  let scanner = document.getElementById('scanner');
+  if(sistema && sistema.style.display === 'block'){
+    scanner.focus();
+  }
+}, 500);
+
+// Inicializar
+render();
 </script>
+
 </body>
 </html>
