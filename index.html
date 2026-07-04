@@ -354,6 +354,14 @@ function ean(v){
   return null;
 }
 
+// Remove zeros à esquerda para comparar códigos com quantidade de dígitos
+// diferente (ex: EAN-13 com zero na frente vs UPC-A de 12 dígitos, ou
+// código de 10 dígitos do scanner vs código de 13 dígitos da nota fiscal).
+function normalizarEAN(v){
+  let d = String(v).replace(/\D/g,'').replace(/^0+/, '');
+  return d === '' ? '0' : d;
+}
+
 // ===== EXTRAIR PALETE E UZ =====
 function extrairPaleteUZ(linhas){
   let palete = '';
@@ -484,11 +492,12 @@ function mostrarFeedback(tipo, msg){
 function processarEAN(codigo){
   codigo = String(codigo).trim().replace(/\D/g,'');
   if(!codigo||codigo.length<4) return;
+  let codigoNorm = normalizarEAN(codigo);
   let achou = false;
   for(let n=0;n<dados.notas.length;n++){
     for(let i=0;i<dados.notas[n].itens.length;i++){
       let item = dados.notas[n].itens[i];
-      if(item.ean===codigo){
+      if(normalizarEAN(item.ean)===codigoNorm){
         if(item.conf<item.qtd){
           item.conf++;
           achou = true;
@@ -507,7 +516,7 @@ function processarEAN(codigo){
   if(!achou){
     let existe = false;
     for(let f=0;f<dados.fora.length;f++){
-      if(dados.fora[f].ean===codigo){dados.fora[f].qtd++;existe=true;break;}
+      if(normalizarEAN(dados.fora[f].ean)===codigoNorm){dados.fora[f].qtd++;existe=true;break;}
     }
     if(!existe) dados.fora.push({ean:codigo,qtd:1});
     mostrarFeedback('err', `✕ EAN <strong>${codigo}</strong> não encontrado nas notas fiscais!`);
